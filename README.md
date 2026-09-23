@@ -1,100 +1,90 @@
-# 🛍️ Clothing Store E-Commerce System (Term Project 2026)
+# 🛍️ Clothing Store E-Commerce & Mobile App (Term Project 2026)
 
-ระบบร้านค้าเสื้อผ้าออนไลน์แบบครบวงจร (Full-Stack E-Commerce Web Application) พัฒนาด้วยภาษา **PHP**, ฐานข้อมูล **MySQL**, สถาปัตยกรรมแบบ Modular Monolithic พร้อมระบบจัดการตะกร้าสินค้าแบบ AJAX, ระบบชำระเงิน **PromptPay QR Code + แนบสลิป**, ระบบหลังบ้านสำหรับผู้ดูแลระบบ (Admin Dashboard) และระบบรักษาความปลอดภัยตามมาตรฐานความปลอดภัยเว็บ
+ระบบร้านค้าเสื้อผ้าออนไลน์แบบครบวงจรระดับองค์กร (Omnichannel Full-Stack E-Commerce System) รองรับการทำงานทั้งบน **เว็บแอปพลิเคชัน (Web Application)** และ **แอปพลิเคชันมือถือ (Mobile App บน Expo Go)** โดยทำงานประสานกันผ่าน **REST API** ฐานข้อมูล **MySQL** เดียวกันแบบ Real-time พร้อมระบบชำระเงิน **PromptPay QR Code + แนบสลิป**, ระบบแอดมินตรวจสลิปและอนุมัติสถานะ, และระบบความปลอดภัยมาตรฐานเว็บสากล
 
 ---
 
 ## 📑 สารบัญ (Table of Contents)
-1. [ภาพรวมของระบบ (Project Overview)](#-ภาพรวมของระบบ-project-overview)
-2. [สถาปัตยกรรมระบบ (System Architecture)](#-สถาปัตยกรรมระบบ-system-architecture)
+1. [ภาพรวมของโครงการ (Project Overview)](#-ภาพรวมของโครงการ-project-overview)
+2. [สถาปัตยกรรมระบบแบบผสมผสาน (Full-Stack Architecture)](#-สถาปัตยกรรมระบบแบบผสมผสาน-full-stack-architecture)
 3. [โครงสร้างฐานข้อมูล (Database Schema & ER Diagram)](#-โครงสร้างฐานข้อมูล-database-schema--er-diagram)
 4. [ผังการทำงานของระบบ (System Workflows)](#-ผังการทำงานของระบบ-system-workflows)
    - [4.1 ผังการสั่งซื้อและชำระเงิน (Checkout & Slip Upload Flow)](#41-ผังการสั่งซื้อและชำระเงิน-checkout--slip-upload-flow)
    - [4.2 ผังการตรวจสอบและอนุมัติสลิปของแอดมิน (Admin Slip Verification Flow)](#42-ผังการตรวจสอบและอนุมัติสลิปของแอดมิน-admin-slip-verification-flow)
    - [4.3 ผังการยืนยันตัวตนและสิทธิ์การเข้าใช้งาน (Authentication & RBAC Flow)](#43-ผังการยืนยันตัวตนและสิทธิ์การเข้าใช้งาน-authentication--rbac-flow)
-5. [โครงสร้างโฟลเดอร์และไฟล์ (Directory Structure)](#-โครงสร้างโฟลเดอร์และไฟล์-directory-structure)
-6. [คุณสมบัติเด่นของระบบ (Key Features)](#-คุณสมบัติเด่นของระบบ-key-features)
-7. [มาตรฐานความปลอดภัย (Security Implementations)](#-มาตรฐานความปลอดภัย-security-implementations)
-8. [คู่มือการติดตั้งและใช้งาน (Installation & Setup)](#-คู่มือการติดตั้งและใช้งาน-installation--setup)
+5. [ตารางเปรียบเทียบฟังก์ชันการทำงาน (Feature Parity: Web vs Mobile)](#-ตารางเปรียบเทียบฟังก์ชันการทำงาน-feature-parity-web-vs-mobile)
+6. [โครงสร้างไดเรกทอรี (Directory Structure)](#-โครงสร้างไดเรกทอรี-directory-structure)
+7. [มาตรฐานความปลอดภัยของระบบ (Security Standards)](#-มาตรฐานความปลอดภัยของระบบ-security-standards)
+8. [คู่มือการติดตั้งและเปิดใช้งาน (Setup & Installation Guide)](#-คู่มือการติดตั้งและเปิดใช้งาน-setup--installation-guide)
+   - [8.1 การติดตั้งและรัน Web Application (XAMPP)](#81-การติดตั้งและรัน-web-application-xampp)
+   - [8.2 การรัน Mobile App บนสมาร์ตโฟนผ่าน Expo Go](#82-การรัน-mobile-app-บนสมาร์ตโฟนผ่าน-expo-go)
+9. [บัญชีผู้ใช้งานสำหรับทดสอบระบบ (Test Accounts)](#-บัญชีผู้ใช้งานสำหรับทดสอบระบบ-test-accounts)
 
 ---
 
-## 🌟 ภาพรวมของระบบ (Project Overview)
+## 🌟 ภาพรวมของโครงการ (Project Overview)
 
-ระบบถูกออกแบบมาเพื่อรองรับกระบวนการซื้อขายเสื้อผ้าออนไลน์เต็มรูปแบบ โดยแบ่งผู้ใช้งานออกเป็น 2 บทบาทหลัก:
-1. **ลูกค้าทั่วไป (Customer / User)**:
-   - ค้นหา กรอง และจัดเรียงสินค้าตามราคา ประเภทสินค้า หรือคำค้นหา
-   - ดูรายละเอียดเชิงลึกของสินค้า (รูปภาพ, สต็อก, ตารางไซส์, รายละเอียดเนื้อผ้า)
-   - สั่งซื้อสินค้าลงตะกร้าแบบ Real-time ด้วย AJAX โดยไม่ต้องโหลดหน้าเว็บใหม่
-   - ชำระเงินด้วยวิธี **PromptPay QR Code** พร้อมแนบไฟล์สลิปหลักฐานการโอนเงิน
-   - ตรวจสอบประวัติการสั่งซื้อ ติดตามสถานะออเดอร์ และพิมพ์ใบเสร็จ (Print Invoice)
-2. **ผู้ดูแลระบบ (Admin)**:
-   - แดชบอร์ดสรุปยอดขาย คำสั่งซื้อรอดำเนินการ และสถิติภาพรวม
-   - ระบบตรวจสอบสลิปโอนเงิน (Inspect Payment Slip) พร้อมกดอนุมัติสถานะเป็น `Paid`
-   - ระบบบริหารจัดการสต็อกสินค้า (เพิ่ม ลบ แก้ไข อัปโหลดรูปภาพสินค้า)
+โครงการนี้ได้รับการออกแบบและพัฒนาขึ้นภายใต้แนวคิด **Omnichannel Architecture** ที่เชื่อมโยงการซื้อขายเสื้อผ้าระหว่างหน้าเว็บและแอปพลิเคชันมือถือเข้าด้วยกันอย่างไร้รอยต่อ:
+
+- **Web Application**: พัฒนาด้วย **PHP 8.2 + MySQL**, หน้าบ้านตกแต่งด้วยธีม **Wireframe Minimalist Boutique** ผสมผสาน **Bootstrap 5.3** และ **AJAX Engine** รองรับ Responsive ทุกหน้าจอ
+- **Mobile Application**: พัฒนาด้วย **React Native + Expo SDK** รองรับการทดสอบสดบนสมาร์ตโฟนจริงผ่านแอป **Expo Go** (ทั้ง iOS และ Android) มีดีไซน์และฟังก์ชันเทียบเท่าหน้าเว็บ 1:1
+- **Unified Backend & REST API**: ฝั่งหลังบ้านใช้ฐานข้อมูล **MySQL** เดียวกัน ให้บริการผ่าน **REST API JSON** รองรับทั้งการส่งข้อมูลแบบ JSON, Base64 Image Processing และ Multipart File Upload
 
 ---
 
-## 🏛️ สถาปัตยกรรมระบบ (System Architecture)
+## 🏛️ สถาปัตยกรรมระบบแบบผสมผสาน (Full-Stack Architecture)
 
-ระบบใช้สถาปัตยกรรมแบบ **Layered Modular Architecture** ที่แยกหน้าที่ระหว่างส่วนติดต่อผู้ใช้ (Presentation Layer), ส่วนประมวลผลตรรกะธุรกิจ (Business Logic Layer), และส่วนจัดการข้อมูล (Data & Storage Layer) ไว้อย่างชัดเจน
+ระบบแยกสถาปัตยกรรมออกเป็น 4 ระดับ (4-Tier Architecture) เพื่อความยืดหยุ่น ความปลอดภัย และประสิทธิภาพสูงสุด:
 
 ```mermaid
 flowchart TD
-    subgraph Client["Client Tier (User Browser)"]
-        UI_Customer["Customer UI<br/>(Bootstrap 5.3 + Custom CSS)"]
-        UI_Admin["Admin UI<br/>(Admin Dashboard + Modals)"]
-        AJAX_Engine["Async Engine<br/>(Fetch API / Vanilla JS)"]
+    subgraph ClientTier["1. Client Tier (ส่วนติดต่อผู้ใช้)"]
+        Web_Browser["🌐 Web Application<br/>(PHP / Bootstrap 5.3 / AJAX)"]
+        Mobile_App["📱 Mobile Application<br/>(React Native / Expo Go)"]
     end
 
-    subgraph Presentation["Presentation & Routing Layer (PHP)"]
-        Pages_Public["Public Pages<br/>(index.php, products.php, product_detail.php)"]
-        Pages_Auth["Auth Pages<br/>(login.php, register.php, profile.php)"]
-        Pages_Order["Order Flow<br/>(cart.php, order_detail.php)"]
-        Pages_Admin["Admin Pages<br/>(admin/manage_orders.php, manage_stock.php)"]
-        Layouts["Shared Layouts<br/>(includes/header.php, footer.php)"]
+    subgraph APITier["2. API & Routing Layer"]
+        CORS_Handler["CORS & JSON Controller<br/>(api/cors.php)"]
+        API_Auth["Auth API (api/auth.php)"]
+        API_Prod["Products API (api/products.php)"]
+        API_Order["Checkout & Orders API (api/orders.php)"]
+        API_Stock["Stock Management API (api/admin_stock.php)"]
     end
 
-    subgraph Logic["Business Logic & Security Layer"]
-        RBAC["Role-Based Access Control<br/>(admin/auth_check.php)"]
-        Session_Mgr["Session Manager<br/>($_SESSION['user_id'], role)"]
-        Cart_Ctrl["Cart & Checkout Engine<br/>(Stock Check & DB Transactions)"]
-        File_Ctrl["Secure File Upload Handler<br/>(MIME whitelist, Size check)"]
+    subgraph ServiceTier["3. Business Logic & Security Tier"]
+        RBAC_Guard["RBAC Authorization Guard<br/>(admin/auth_check.php)"]
+        Tx_Manager["Database Transaction Manager<br/>(Stock Deduct & Order Creation)"]
+        File_Engine["Dual Image Engine<br/>(Base64 Decoder & Multipart Upload)"]
+        Password_Security["BCrypt Security Engine<br/>(password_hash / verify)"]
     end
 
-    subgraph DataTier["Data & Storage Tier"]
-        DB_Conn["Database Connector<br/>(config/db.php - MySQLi Singleton)"]
-        MySQL[("MySQL Database<br/>(users, products, orders, order_items)")]
-        Storage_Slips[("File Storage: Slips<br/>(uploads/slips/)")]
-        Storage_Prods[("File Storage: Products<br/>(uploads/)")]
-        Storage_Assets[("Static Assets<br/>(assets/qrcode.jpg)")]
+    subgraph DataTier["4. Data & Storage Tier"]
+        MySQL_DB[("🗄️ MySQL Database (clothing_store)<br/>users, products, orders, order_items")]
+        Slip_Storage[("📁 Payment Slips Storage<br/>(uploads/slips/)")]
+        Prod_Storage[("📁 Product Media Storage<br/>(uploads/)")]
+        Static_Assets[("🖼️ Static Assets<br/>(assets/qrcode.jpg)")]
     end
 
-    UI_Customer --> Pages_Public
-    UI_Customer --> Pages_Auth
-    UI_Customer --> Pages_Order
-    UI_Admin --> Pages_Admin
-    AJAX_Engine --> Pages_Order
+    Web_Browser --> CORS_Handler
+    Mobile_App --> CORS_Handler
 
-    Pages_Public --> Layouts
-    Pages_Auth --> Layouts
-    Pages_Order --> Layouts
-    Pages_Admin --> Layouts
+    CORS_Handler --> API_Auth
+    CORS_Handler --> API_Prod
+    CORS_Handler --> API_Order
+    CORS_Handler --> API_Stock
 
-    Pages_Admin --> RBAC
-    Pages_Auth --> Session_Mgr
-    Pages_Order --> Cart_Ctrl
-    Pages_Order --> File_Ctrl
-    Pages_Admin --> Cart_Ctrl
-    Pages_Admin --> File_Ctrl
+    API_Auth --> Password_Security
+    API_Order --> Tx_Manager
+    API_Order --> File_Engine
+    API_Stock --> File_Engine
+    API_Stock --> RBAC_Guard
 
-    Cart_Ctrl --> DB_Conn
-    RBAC --> DB_Conn
-    Session_Mgr --> DB_Conn
-    File_Ctrl --> Storage_Slips
-    File_Ctrl --> Storage_Prods
-    Pages_Order --> Storage_Assets
-    DB_Conn --> MySQL
+    Tx_Manager --> MySQL_DB
+    Password_Security --> MySQL_DB
+    File_Engine --> Slip_Storage
+    File_Engine --> Prod_Storage
+    Web_Browser --> Static_Assets
+    Mobile_App --> Static_Assets
 ```
 
 ---
@@ -111,43 +101,43 @@ erDiagram
 
     USERS {
         int id PK "Auto Increment"
-        varchar username "Unique user handle"
-        varchar password "BCrypt Hash"
-        varchar fullname "Full Name"
-        varchar email "Email Address"
-        varchar phone "Contact Number"
-        varchar role "user | admin"
+        varchar username "ชื่อผู้ใช้ (Unique)"
+        varchar password "รหัสผ่าน BCrypt Hash"
+        varchar fullname "ชื่อ-นามสกุล"
+        varchar email "อีเมล (Unique)"
+        varchar phone "เบอร์โทรศัพท์"
+        varchar role "สิทธิ์ (user หรือ admin)"
     }
 
     PRODUCTS {
         int id PK "Auto Increment"
-        varchar name "Product Title"
-        text description "Detailed Description"
+        varchar name "ชื่อสินค้า"
+        text description "รายละเอียดเนื้อผ้าและสินค้า"
         varchar gender "men | women | unisex"
         varchar category "men | women | clearance"
-        varchar subcategory "shirts | bottoms | etc."
-        int is_clearance "0: Normal, 1: Clearance"
-        int price "Price in THB"
-        int stock "Inventory balance"
-        varchar image "Filename in uploads/"
+        varchar subcategory "shirts | bottoms"
+        int is_clearance "0: ปกติ, 1: สินค้าลดราคา"
+        int price "ราคาสินค้า (บาท)"
+        int stock "จำนวนสินค้าคงเหลือ"
+        varchar image "พาธรูปภาพใน uploads/"
     }
 
     ORDERS {
         int id PK "Auto Increment"
-        int user_id FK "References USERS(id)"
-        int total_amount "Total sum in THB"
+        int user_id FK "รหัสลูกค้า อ้างอิง USERS(id)"
+        int total_amount "ยอดเงินสุทธิ (บาท)"
         varchar payment_method "PromptPay QR"
         varchar status "Pending | Paid | Shipped | Cancelled"
-        varchar slip_image "Path to uploads/slips/"
-        timestamp created_at "Creation timestamp"
+        varchar slip_image "พาธรูปสลิปใน uploads/slips/"
+        timestamp created_at "วันและเวลาที่สั่งซื้อ"
     }
 
     ORDER_ITEMS {
         int id PK "Auto Increment"
-        int order_id FK "References ORDERS(id)"
-        int product_id FK "References PRODUCTS(id)"
-        int quantity "Ordered count"
-        int price "Price snapshot at purchase"
+        int order_id FK "รหัสออเดอร์ อ้างอิง ORDERS(id)"
+        int product_id FK "รหัสสินค้า อ้างอิง PRODUCTS(id)"
+        int quantity "จำนวนที่สั่งซื้อ"
+        int price "ราคาต่อหน่วย ณ วันสั่งซื้อ"
     }
 ```
 
@@ -156,68 +146,70 @@ erDiagram
 ## 🔄 ผังการทำงานของระบบ (System Workflows)
 
 ### 4.1 ผังการสั่งซื้อและชำระเงิน (Checkout & Slip Upload Flow)
-ลูกค้าเลือกสินค้า สแกน QR Code พร้อมเพย์ และแนบสลิปเพื่อส่งคำสั่งซื้อ
+รองรับการสั่งซื้อผ่านทั้ง **เว็บ** (Multipart Upload) และ **มือถือ** (Base64 JSON Upload) พร้อมกัน
 
 ```mermaid
 sequenceDiagram
     autonumber
     actor Customer as 👤 ลูกค้า (Customer)
-    participant UI as 🖥️ หน้าเว็บ (cart.php)
-    participant PHP as ⚙️ ระบบหลังบ้าน (PHP Engine)
-    participant FileSys as 📁 ที่เก็บไฟล์ (uploads/slips/)
-    participant DB as 🗄️ ฐานข้อมูล (MySQL)
+    participant Client as 📱 Mobile App / 🌐 Web Browser
+    participant API as ⚙️ Checkout API (api/checkout.php)
+    participant Storage as 📁 Storage (uploads/slips/)
+    participant DB as 🗄️ MySQL Database
 
-    Customer->>UI: เพิ่มสินค้าลงตะกร้า (AJAX Add to Cart)
-    UI->>Customer: แสดงสรุปยอดเงิน และ PromptPay QR (assets/qrcode.jpg)
+    Customer->>Client: เลือกสินค้าลงตะกร้า และตรวจสอบยอดชำระ
+    Client->>Customer: แสดงสรุปยอดเงิน และภาพ PromptPay QR (assets/qrcode.jpg)
     Customer->>Customer: ใช้ Mobile Banking สแกน QR โอนเงิน
-    Customer->>UI: กรอกที่อยู่จัดส่ง + แนบรูปสลิปโอนเงิน
-    Customer->>UI: คลิก "ยืนยันการสั่งซื้อและแนบสลิป"
+    Customer->>Client: แนบรูปสลิป (เลือกจากอัลบั้มมือถือ หรืออัปโหลดไฟล์)
+    Customer->>Client: กดปุ่ม "ยืนยันการสั่งซื้อและแนบสลิป"
     
-    UI->>PHP: ส่งข้อมูล Form (POST multipart/form-data)
-    PHP->>PHP: ตรวจสอบ MIME Type, นามสกุล (.jpg, .png) และขนาด (<= 5MB)
-    PHP->>FileSys: บันทึกไฟล์รูปสลิปสุ่มชื่อเป็น slip_timestamp_rand.jpg
-    
-    PHP->>DB: เริ่มต้น Transaction (BEGIN TRANSACTION)
-    PHP->>DB: INSERT ลงตาราง orders (status='Pending', slip_image=...)
-    loop แต่ละสินค้าในตะกร้า
-        PHP->>DB: INSERT ลงตาราง order_items
-        PHP->>DB: UPDATE products SET stock = stock - qty (ตัดสต็อกสินค้า)
+    alt จาก Mobile App (Expo Go)
+        Client->>API: ส่ง POST JSON พร้อม Base64 String ของรูปสลิป
+        API->>Storage: ถอดรหัส Base64 บันทึกเป็นไฟล์ slip_timestamp_rand.jpg
+    else จาก Web Browser
+        Client->>API: ส่ง POST multipart/form-data พร้อมไฟล์รูปสลิป
+        API->>Storage: ย้ายไฟล์สลิปไปเก็บยัง uploads/slips/
     end
-    PHP->>DB: ยืนยันการบันทึก (COMMIT TRANSACTION)
+
+    API->>DB: เริ่มต้น Transaction (BEGIN TRANSACTION)
+    API->>DB: INSERT ลงตาราง orders (status='Pending', slip_image=...)
+    loop แต่ละสินค้าในตะกร้า
+        API->>DB: INSERT ลงตาราง order_items (order_id, product_id, qty, price)
+        API->>DB: UPDATE products SET stock = stock - qty (ตัดสต็อกสินค้า)
+    end
+    API->>DB: ยืนยันข้อมูล (COMMIT TRANSACTION)
     
-    PHP->>PHP: ล้างข้อมูลตะกร้าสินค้า (unset $_SESSION['cart'])
-    PHP-->>UI: แสดงข้อความแจ้งเตือน "สั่งซื้อสำเร็จ รอดำเนินการตรวจสอบสลิป"
-    UI-->>Customer: แสดงหน้าสรุปคำสั่งซื้อ และสถานะ Pending
+    API-->>Client: ตอบกลับ JSON { success: true, order_id: X, status: 'Pending' }
+    Client-->>Customer: แจ้งเตือน "สั่งซื้อสำเร็จ รอดำเนินการตรวจสอบสลิป"
 ```
 
 ---
 
 ### 4.2 ผังการตรวจสอบและอนุมัติสลิปของแอดมิน (Admin Slip Verification Flow)
-ผู้ดูแลระบบตรวจสอบยอดเงินและเวลาในสลิปผ่าน Modal แล้วอนุมัติสถานะเป็น `Paid`
 
 ```mermaid
 sequenceDiagram
     autonumber
     actor Admin as 👨‍💼 ผู้ดูแลระบบ (Admin)
-    participant AdminUI as 🖥️ หน้าจัดการออเดอร์ (manage_orders.php)
-    participant Modal as 🔍 หน้าต่างตรวจสลิป (Slip Modal)
-    participant PHP as ⚙️ ระบบหลังบ้าน (PHP Engine)
-    participant DB as 🗄️ ฐานข้อมูล (MySQL)
+    participant UI as 🖥️ หน้าจัดการออเดอร์ (Web / Mobile)
+    participant API as ⚙️ Orders API (api/orders.php)
+    participant DB as 🗄️ MySQL Database
 
-    Admin->>AdminUI: เข้าเมนู "จัดการคำสั่งซื้อ" (auth_check.php ตรวจสิทธิ์ role='admin')
-    AdminUI->>DB: SELECT คำสั่งซื้อทั้งหมด (แสดง KPI และตาราง)
-    DB-->>AdminUI: รายการออเดอร์ (สถานะ Pending, Paid, ฯลฯ)
+    Admin->>UI: เข้าสู่ระบบในฐานะ Admin และเปิดเมนูจัดการคำสั่งซื้อ
+    UI->>API: ดึงรายการออเดอร์ทั้งหมด พร้อมตัวเลขสรุป KPI
+    API->>DB: SELECT orders JOIN users ORDER BY id DESC
+    DB-->>API: ข้อมูลออเดอร์และยอดขาย
+    API-->>UI: แสดงตารางออเดอร์และการ์ดสรุป KPI (Total, Pending, Revenue)
     
-    Admin->>AdminUI: คลิกปุ่ม "ตรวจสลิป" ของออเดอร์สถานะ Pending
-    AdminUI->>Modal: เปิด Modal ขยายภาพสลิปขนาดเต็มจาก uploads/slips/
-    Admin->>Modal: ตรวจสอบยอดเงิน วันที่ และเวลาโอน
+    Admin->>UI: กดปุ่ม "🔍 ตรวจสอบสลิป (View Slip)" ของออเดอร์สถานะ Pending
+    UI->>UI: เปิดหน้าต่าง Modal ขยายภาพสลิปขนาดเต็มเพื่อตรวจสอบยอดและเวลาโอน
     
-    Admin->>Modal: คลิกปุ่ม "อนุมัติการชำระเงิน (Confirm Paid)"
-    Modal->>PHP: ส่งคำขอ POST action='update_status', status='Paid'
-    PHP->>DB: UPDATE orders SET status = 'Paid' WHERE id = ?
-    DB-->>PHP: บันทึกการเปลี่ยนสถานะสำเร็จ
-    PHP-->>AdminUI: รีเฟรชหน้ารายการพร้อม Toast แจ้งเตือน "อัปเดตสถานะเป็น Paid สำเร็จ"
-    AdminUI-->>Admin: ออเดอร์เปลี่ยนสถานะเป็น Paid (Badge สีเขียว)
+    Admin->>UI: คลิกปุ่ม "✓ อนุมัติสลิป (Set Paid)"
+    UI->>API: ส่ง POST action='update_status', order_id=X, status='Paid'
+    API->>DB: UPDATE orders SET status = 'Paid' WHERE id = ?
+    DB-->>API: อัปเดตสถานะในฐานข้อมูลสำเร็จ
+    API-->>UI: ตอบกลับ JSON { success: true, message: '...' }
+    UI-->>Admin: อัปเดตสถานะเป็น "Paid" พร้อมแสดง Badge สีเขียวทันที
 ```
 
 ---
@@ -235,11 +227,11 @@ flowchart TD
     UserExist -- "พบ" --> CheckPass{"password_verify ถูกต้องหรือไม่?"}
     CheckPass -- "ไม่ตรง" --> LoginFail
     
-    CheckPass -- "ถูกต้อง" --> SetSession["บันทึก Session<br/>user_id และ role"]
+    CheckPass -- "ถูกต้อง" --> SetSession["บันทึก Session หรือ User Object<br/>user_id และ role"]
     SetSession --> CheckRole{"ตรวจสอบบทบาทผู้ใช้ (Role)"}
     
-    CheckRole -- "admin" --> AdminPerm["เข้าถึงได้ทุกส่วนของระบบ<br/>(หน้าร้าน + โฟลเดอร์ admin/)"]
-    CheckRole -- "user" --> UserPerm["เข้าถึงได้เฉพาะหน้าร้าน<br/>และข้อมูลคำสั่งซื้อของตนเอง"]
+    CheckRole -- "admin" --> AdminPerm["เข้าถึงได้ทุกส่วนของระบบ<br/>(หน้าร้านค้า + แผงจัดการสต็อก + ตรวจสอบสลิป)"]
+    CheckRole -- "user" --> UserPerm["เข้าถึงได้เฉพาะหน้าร้านค้า<br/>และข้อมูลคำสั่งซื้อของตนเอง"]
     
     UserPerm --> TryAdmin{"พยายามเข้าถึงโฟลเดอร์ admin/ ?"}
     TryAdmin -- "ใช่" --> BlockAdmin["ปฏิเสธการเข้าถึง<br/>Redirect ไปยัง index.php"]
@@ -248,109 +240,169 @@ flowchart TD
 
 ---
 
-## 📂 โครงสร้างโฟลเดอร์และไฟล์ (Directory Structure)
+## 📊 ตารางเปรียบเทียบฟังก์ชันการทำงาน (Feature Parity: Web vs Mobile)
+
+| ฟังก์ชันการทำงาน (Features) | Web Application | Mobile App (Expo Go) | รายละเอียดทางเทคนิค |
+| :--- | :---: | :---: | :--- |
+| **แคตตาล็อกสินค้า (Product Catalog)** | ✅ | ✅ | แสดงสินค้าแบบ Grid พร้อม Badge หมวดหมู่ |
+| **ค้นหาตามคีย์เวิร์ด (Live Search)** | ✅ | ✅ | ค้นหาจากชื่อสินค้าและคำบรรยาย |
+| **ตัวกรองประเภทย่อย (Subcategory)** | ✅ | ✅ | แยกดูเฉพาะเสื้อ (`Shirts`) หรือกางเกง (`Bottoms`) |
+| **ตัวกรองช่วงราคา (Price Range)** | ✅ | ✅ | กำหนดราคาต่ำสุด (Min) และราคาสูงสุด (Max) |
+| **จัดเรียงสินค้า (Sorting)** | ✅ | ✅ | ล่าสุด, ราคาต่ำ-สูง, ราคาสูง-ต่ำ, ชื่อ A-Z |
+| **หน้ารายละเอียดสินค้า (Product Details)** | ✅ | ✅ | เลือกไซส์ S, M, L, XL, 2XL และปรับจำนวน |
+| **ตารางเทียบขนาด (Size Guide Table)** | ✅ | ✅ | ตารางระบุขนาด อก, ยาว, ไหล่ ครบทุกขนาด |
+| **สินค้าที่เกี่ยวข้อง (Related Products)** | ✅ | ✅ | แนะนำสินค้าหมวดหมู่เดียวกันด้านล่าง |
+| **ชำระเงินด้วย PromptPay QR Code** | ✅ | ✅ | ชำระเงินวิธีเดียวผ่านภาพ QR Code พร้อมเพย์ |
+| **แนบสลิปการโอนเงิน (Slip Upload)** | ✅ | ✅ | เว็บอัปโหลดไฟล์ / มือถือเลือกรูปจากอัลบั้ม (`base64: true`) |
+| **ใบเสร็จรับเงิน (Invoice & Receipt)** | ✅ | ✅ | แสดงรายละเอียดคำสั่งซื้อ, ยอดเงิน, รูปสลิปที่แนบ |
+| **แก้ไขข้อมูลส่วนตัว (Edit Profile)** | ✅ | ✅ | เปลี่ยนชื่อ-นามสกุล, อีเมล, และเบอร์โทรศัพท์ |
+| **เปลี่ยนรหัสผ่าน (Change Password)** | ✅ | ✅ | ตรวจสอบรหัสเดิมและเข้ารหัสรหัสใหม่ด้วย BCrypt |
+| **แอดมิน: การ์ดสรุป KPI ยอดขาย** | ✅ | ✅ | ยอดขายสุทธิ, ออเดอร์ทั้งหมด, ออเดอร์รอตรวจ |
+| **แอดมิน: ตรวจสอบสลิปขยายเต็ม** | ✅ | ✅ | หน้าต่าง Modal ขยายภาพสลิปความละเอียดสูง |
+| **แอดมิน: อนุมัติสลิปเปลี่ยนเป็น Paid** | ✅ | ✅ | ปุ่มกดอนุมัติใน 1 คลิก พร้อมอัปเดตสถานะทันที |
+| **แอดมิน: บริหารจัดการสต็อกสินค้า** | ✅ | ✅ | ปรับจำนวนสต็อก (+/-), เพิ่มสินค้าใหม่, ลบสินค้า |
+
+---
+
+## 📂 โครงสร้างไดเรกทอรี (Directory Structure)
 
 ```plaintext
 clothing_store/
-├── admin/                           # พื้นที่การจัดการสำหรับผู้ดูแลระบบ (Admin Only)
-│   ├── auth_check.php               # Middleware ตรวจสอบสิทธิ์ผู้ดูแลระบบ (RBAC Guard)
-│   ├── manage_orders.php            # จัดการออเดอร์ ตรวจสอบสลิป และอนุมัติสถานะชำระเงิน
-│   └── manage_stock.php             # จัดการสต็อกสินค้า (เพิ่ม ลบ แก้ไข อัปโหลดรูปสินค้า)
-├── assets/                          # ไฟล์ทรัพยากรคงที่ของระบบ (Static Assets)
-│   └── qrcode.jpg                   # ภาพ QR Code พร้อมเพย์สำหรับรับชำระเงิน
-├── config/                          # การตั้งค่าระบบและฐานข้อมูล
-│   └── db.php                       # ไฟล์เชื่อมต่อฐานข้อมูล MySQLi แบบรวมศูนย์
-├── includes/                        # ชิ้นส่วน UI ส่วนกลาง (Reusable Layout Components)
-│   ├── header.php                   # แถบเมนูด้านบน (Navbar), ตะกร้าสินค้า และการเชื่อมโยง CSS
-│   └── footer.php                   # ท้ายหน้าเว็บ, Toast Notification UI และ Script JS
-├── uploads/                         # โฟลเดอร์เก็บไฟล์สื่อที่อัปโหลดเข้าสู่ระบบ
-│   ├── .gitkeep                     # รักษาโครงสร้างไดเรกทอรีใน Git
-│   └── slips/                       # โฟลเดอร์เก็บรูปสลิปหลักฐานการโอนเงินของลูกค้า
+├── admin/                           # ระบบหลังบ้านฝั่งเว็บ (Web Backoffice - Admin Only)
+│   ├── auth_check.php               # Middleware ตรวจสอบสิทธิ์ผู้ดูแลระบบ (RBAC)
+│   ├── manage_orders.php            # แดชบอร์ดจัดการคำสั่งซื้อ ตรวจสอบสลิป และอนุมัติสถานะ
+│   └── manage_stock.php             # จัดการสต็อกสินค้า (เพิ่ม ลบ แก้ไข อัปโหลดรูป)
+├── api/                             # REST API Endpoints สำหรับ Mobile App และ External Clients
+│   ├── cors.php                     # Centralized CORS Header และฟังก์ชัน JSON Response
+│   ├── auth.php                     # API เข้าสู่ระบบ, สมัครสมาชิก, แก้ไขโปรไฟล์, เปลี่ยนรหัสผ่าน
+│   ├── products.php                 # API รายการสินค้า, ค้นหา, กรองช่วงราคา, เรียงลำดับ, รายละเอียด
+│   ├── checkout.php                 # API สั่งซื้อสินค้า ตัดสต็อก และบันทึกสลิป (Base64 & Multipart)
+│   ├── orders.php                   # API ประวัติออเดอร์ลูกค้า, รายการออเดอร์แอดมิน, ปรับสถานะ Paid
+│   └── admin_stock.php              # API บริหารจัดการสต็อกสินค้า เพิ่ม/แก้ไข/ลบ และสถิติ
+├── assets/                          # ไฟล์ทรัพยากรคงที่
+│   └── qrcode.jpg                   # ภาพ PromptPay QR Code สำหรับรับชำระเงิน
+├── config/
+│   └── db.php                       # ไฟล์เชื่อมต่อฐานข้อมูล MySQLi รวมศูนย์
+├── includes/                        # Layout ส่วนกลางของหน้าเว็บ (Navbar, Footer, Toast UI)
+│   ├── header.php
+│   └── footer.php
+├── mobile/                          # แอปพลิเคชันมือถือ (React Native + Expo SDK)
+│   ├── App.js                       # Entry Point หลักของแอปมือถือ
+│   ├── app.json                     # การตั้งค่าแอป Expo
+│   ├── package.json                 # Dependencies ของแอปมือถือ
+│   └── src/
+│       ├── config.js                # กำหนดค่า Server IP (`192.168.1.141`) สำหรับเชื่อมต่อ XAMPP
+│       ├── theme.js                 # Design Tokens ชุดสี Wireframe ถอดแบบจากหน้าเว็บ
+│       ├── services/
+│       │   └── api.js               # Service เรียกใช้งาน REST API Backend ครบทุก Endpoint
+│       └── components/
+│           ├── ProductCard.js       # การ์ดสินค้าสไตล์ไวร์เฟรมมินิมอล
+│           ├── ProductDetailModal.js# หน้ารายละเอียดสินค้า, ไซส์, ตารางไซส์, สินค้าที่เกี่ยวข้อง
+│           ├── CartModal.js         # ตะกร้าสินค้า, สแกน QR, เลือกรูปสลิปจากอัลบั้มมือถือ
+│           ├── OrdersModal.js       # ประวัติการสั่งซื้อของลูกค้า
+│           ├── OrderDetailModal.js  # ใบเสร็จรับเงินฉบับเต็ม และปุ่มอนุมัติสำหรับแอดมิน
+│           ├── ProfileModal.js      # หน้าข้อมูลส่วนตัว, แก้ไขโปรไฟล์, เปลี่ยนรหัสผ่าน
+│           ├── FilterModal.js       # หน้าต่างตัวกรองขั้นสูง (Subcategory, Price, Sort)
+│           ├── AdminOrdersModal.js  # แผงจัดการออเดอร์และตรวจสลิปสำหรับแอดมิน
+│           └── AdminStockModal.js   # แผงจัดการสต็อกสินค้า ปรับสต็อกด่วน และเพิ่มสินค้าใหม่
+├── uploads/                         # โฟลเดอร์จัดเก็บไฟล์ภาพที่อัปโหลดเข้าสู่ระบบ
+│   ├── .gitkeep
+│   └── slips/                       # โฟลเดอร์เก็บรูปสลิปโอนเงินของลูกค้า
 │       └── .gitkeep
-├── index.php                        # หน้าแรกของเว็บไซต์ (Landing Page & Hero Section)
-├── products.php                     # หน้ารวมสินค้า พร้อมแถบค้นหา ตัวกรองราคา และการจัดเรียง
-├── product_detail.php               # หน้ารายละเอียดสินค้า ไซส์ ตารางขนาด และสินค้าที่เกี่ยวข้อง
-├── cart.php                         # ตะกร้าสินค้า, สแกน PromptPay QR และฟอร์มแนบสลิป
-├── order_detail.php                 # หน้ารายละเอียดคำสั่งซื้อ และระบบพิมพ์ใบเสร็จ (Print Invoice)
-├── login.php                        # หน้าเข้าสู่ระบบ
-├── register.php                     # หน้าลงทะเบียนผู้ใช้งานใหม่
-├── logout.php                       # หน้าออกจากระบบและทำลาย Session
-├── profile.php                      # หน้าโปรไฟล์ผู้ใช้ และประวัติการสั่งซื้อ
-├── edit_profile.php                 # หน้าแก้ไขข้อมูลส่วนตัว
-├── change_password.php              # หน้าเปลี่ยนรหัสผ่าน
-├── forgot_password.php              # หน้าลืมรหัสผ่าน (จำลองการกู้คืนรหัส)
-├── ER_DIAGRAM.md                    # เอกสารรายละเอียดโครงสร้างฐานข้อมูล
-└── README.md                        # เอกสารอธิบายภาพรวมและสถาปัตยกรรมของโปรเจกต์
+├── index.php                        # หน้าแรกของเว็บ (Hero Section & Featured Products)
+├── products.php                     # หน้ารวมสินค้าฝั่งเว็บ พร้อมแถบค้นหาและตัวกรอง
+├── product_detail.php               # หน้ารายละเอียดสินค้าฝั่งเว็บ พร้อมตารางไซส์
+├── cart.php                         # ตะกร้าสินค้าฝั่งเว็บ สแกน QR และฟอร์มแนบสลิป
+├── order_detail.php                 # หน้ารายละเอียดคำสั่งซื้อและพิมพ์ใบเสร็จ (Print Invoice)
+├── profile.php                      # หน้าโปรไฟล์และประวัติคำสั่งซื้อฝั่งเว็บ
+├── edit_profile.php                 # หน้าแก้ไขข้อมูลส่วนตัวฝั่งเว็บ
+├── change_password.php              # หน้าเปลี่ยนรหัสผ่านฝั่งเว็บ
+├── login.php                        # หน้าเข้าสู่ระบบฝั่งเว็บ
+├── register.php                     # หน้าลงทะเบียนผู้ใช้ฝั่งเว็บ
+├── logout.php                       # หน้าออกจากระบบ
+├── ER_DIAGRAM.md                    # เอกสารรายละเอียดโครงสร้างฐานข้อมูลและ DDL
+├── README.md                        # เอกสารภาพรวมและคู่มือระบบ (Master Documentation)
+└── .gitignore                       # ละเว้นโฟลเดอร์ node_modules และไฟล์ชั่วคราว
 ```
 
 ---
 
-## 💎 คุณสมบัติเด่นของระบบ (Key Features)
+## 🔒 มาตรฐานความปลอดภัยของระบบ (Security Standards)
 
-| ฟีเจอร์ (Feature) | คำอธิบายการทำงาน (Description) | ไฟล์หลักที่เกี่ยวข้อง |
-| :--- | :--- | :--- |
-| **PromptPay QR Payment** | รับชำระเงินวิธีเดียวผ่าน PromptPay QR Code พร้อมระบบบังคับอัปโหลดสลิป | [`cart.php`](file:///D:/Xamp/htdocs/clothing_store/cart.php) |
-| **Slip Inspection Modal** | แอดมินสามารถเปิดดูรูปสลิปขนาดเต็ม และกดอนุมัติสถานะเป็น `Paid` ได้ในคลิกเดียว | [`admin/manage_orders.php`](file:///D:/Xamp/htdocs/clothing_store/admin/manage_orders.php) |
-| **AJAX Add to Cart** | เพิ่มสินค้าลงตะกร้าแบบ Asynchronous พร้อมอัปเดตตัวเลข Badge และ Toast UI | [`cart.php`](file:///D:/Xamp/htdocs/clothing_store/cart.php), [`includes/footer.php`](file:///D:/Xamp/htdocs/clothing_store/includes/footer.php) |
-| **Product Detail Page** | หน้าแสดงรายละเอียดสินค้าแบบครบวงจร พร้อมตัวเลือกไซส์ (S, M, L, XL, XXL) | [`product_detail.php`](file:///D:/Xamp/htdocs/clothing_store/product_detail.php) |
-| **Search & Advanced Filters** | ค้นหาแบบเรียลไทม์ กรองช่วงราคา (Min-Max) และจัดเรียงสินค้าตามเงื่อนไข | [`products.php`](file:///D:/Xamp/htdocs/clothing_store/products.php) |
-| **Printable Invoice** | หน้ารายละเอียดออเดอร์พร้อมปุ่มพิมพ์ใบเสร็จ ปรับแต่ง CSS สำหรับพิมพ์กระดาษ A4 | [`order_detail.php`](file:///D:/Xamp/htdocs/clothing_store/order_detail.php) |
-| **Stock Management** | แอดมินสามารถเพิ่ม ลบ แก้ไขสต็อกสินค้า อัปโหลดรูป และแก้ไขรายละเอียด | [`admin/manage_stock.php`](file:///D:/Xamp/htdocs/clothing_store/admin/manage_stock.php) |
-
----
-
-## 🔒 มาตรฐานความปลอดภัย (Security Implementations)
-
-1. **การป้องกัน SQL Injection**:
-   - คำสั่งคิวรีทุกส่วนที่รับค่าจากผู้ใช้ (Input Variables) จะประมวลผลผ่าน **Prepared Statements (`mysqli_stmt`)** ร่วมกับ Parameter Binding เสมอ 100%
-2. **การรักษาความปลอดภัยของรหัสผ่าน**:
-   - รหัสผ่านผู้ใช้งานถูกเข้ารหัสด้วยอัลกอริทึม **BCrypt** ผ่านฟังก์ชันมาตรฐาน `password_hash($password, PASSWORD_BCRYPT)` และตรวจสอบด้วย `password_verify()`
-3. **การควบคุมการเข้าถึงตามบทบาท (Role-Based Access Control - RBAC)**:
-   - ไฟล์ในโฟลเดอร์ `admin/` จะต้องเรียกใช้ [`admin/auth_check.php`](file:///D:/Xamp/htdocs/clothing_store/admin/auth_check.php) เพื่อตรวจสอบว่าผู้ใช้ล็อกอินและมีสิทธิ์ `role === 'admin'` หากไม่ใช่จะถูกตัดสิทธิ์ทันที
-4. **การตรวจสอบไฟล์อัปโหลดอย่างเข้มงวด (Secure File Upload)**:
-   - ตรวจสอบทั้งนามสกุลไฟล์ และตรวจสอบ **MIME Type** จริงของไฟล์รูปภาพ
-   - กำหนดขนาดไฟล์สูงสุดไม่เกิน 5MB
-   - สุ่มเปลี่ยนชื่อไฟล์ใหม่ตามรูปแบบ Timestamp + Random Hex เพื่อป้องกันการเขียนทับไฟล์และ Path Traversal
-5. **ความถูกต้องสมบูรณ์ของข้อมูลธุรกรรม (Transaction Integrity)**:
-   - การตัดสต็อกสินค้าและการบันทึกออเดอร์ทำงานภายใต้ **Database Transaction** หากมีขั้นตอนใดล้มเหลว ระบบจะทำการ `rollback()` เพื่อป้องกันข้อมูลผิดพลาด
+1. **การป้องกัน SQL Injection 100%**:
+   - ทุกคำสั่ง SQL ทั้งในฝั่งเว็บและใน REST API ที่รับค่าจากผู้ใช้ จะต้องทำงานผ่าน **Prepared Statements (`mysqli_stmt`)** และทำการผูกพารามิเตอร์ (Parameter Binding) เสมอ
+2. **การเข้ารหัสผ่านแบบ One-Way Hash (BCrypt)**:
+   - รหัสผ่านผู้ใช้งานไม่มีการเก็บเป็น Plain Text ในฐานข้อมูล โดยจะถูกแฮชผ่าน `password_hash($pass, PASSWORD_BCRYPT)` และตรวจสอบด้วย `password_verify()`
+3. **การควบคุมสิทธิ์ตามบทบาท (Role-Based Access Control - RBAC)**:
+   - ตรวจสอบสิทธิ์สองชั้น: ฝั่งเว็บใช้ Middleware [`admin/auth_check.php`](file:///D:/Xamp/htdocs/clothing_store/admin/auth_check.php) ป้องกันการเข้าถึงไฟล์โดยไม่ได้รับอนุญาต และฝั่ง API ตรวจสอบสิทธิ์ก่อนอนุญาตให้เรียกฟังก์ชันผู้ดูแลระบบ
+4. **ความปลอดภัยในการอัปโหลดไฟล์ภาพและสลิป (File Security)**:
+   - ตรวจสอบนามสกุลไฟล์และ **MIME Type** (อนุญาตเฉพาะ `jpg`, `jpeg`, `png`, `webp`)
+   - จำกัดขนาดไฟล์สลิปไม่เกิน 10MB
+   - สุ่มเปลี่ยนชื่อไฟล์ด้วย Timestamp + Cryptographically Secure Random Hex ป้องกันการเขียนทับไฟล์และ Path Traversal
+   - ฝั่งมือถือรองรับการส่งผ่าน **Base64 JSON** เพื่อหลีกเลี่ยงข้อผิดพลาดเรื่องสิทธิ์การอ่านไฟล์ของระบบ Android
+5. **ความถูกต้องสมบูรณ์ของธุรกรรม (Database Transaction Integrity)**:
+   - ในขั้นตอนการสั่งซื้อ ระบบจะใช้ `begin_transaction()` ควบคุมการสร้างออเดอร์, บันทึกรายการสินค้า, และตัดสต็อก หากขั้นตอนใดล้มเหลว ระบบจะทำการ `rollback()` และลบไฟล์สลิปที่อัปโหลดทันที เพื่อป้องกันข้อมูลไม่สอดคล้องกัน
 
 ---
 
-## 🚀 คู่มือการติดตั้งและใช้งาน (Installation & Setup)
+## 🚀 คู่มือการติดตั้งและเปิดใช้งาน (Setup & Installation Guide)
 
-### ข้อกำหนดของระบบ (System Requirements)
-- เว็บเซิร์ฟเวอร์: **Apache** (เช่น XAMPP, WampServer หรือ Laragon)
-- ภาษา: **PHP 8.0 ขึ้นไป** พร้อม Extension `mysqli`, `fileinfo`
-- ระบบจัดการฐานข้อมูล: **MySQL 5.7+** หรือ **MariaDB 10.4+**
+### 8.1 การติดตั้งและรัน Web Application (XAMPP)
 
-### ขั้นตอนการติดตั้ง (Setup Steps)
-
-1. **คัดลอกโปรเจกต์ไปยัง Web Root**:
-   - ย้ายโฟลเดอร์โปรเจกต์ไปไว้ที่ `D:\Xamp\htdocs\clothing_store` (หรือไดเรกทอรี `htdocs` ของคุณ)
-
-2. **สร้างฐานข้อมูลและตารางข้อมูล**:
-   - เปิดโปรแกรม XAMPP Control Panel แล้วกด Start โมดูล **Apache** และ **MySQL**
-   - ไปที่ `http://localhost/phpmyadmin`
-   - สร้างฐานข้อมูลชื่อ: `clothing_store` กำหนด Collation เป็น `utf8mb4_general_ci`
+1. **เตรียมโปรแกรมที่จำเป็น**:
+   - ติดตั้ง [XAMPP](https://www.apachefriends.org/) (เวอร์ชัน PHP 8.2 ขึ้นไป)
+2. **นำโฟลเดอร์โปรเจกต์ไปวาง**:
+   - นำโฟลเดอร์ `clothing_store` ไปวางไว้ที่ไดเรกทอรี `htdocs` เช่น `D:\Xamp\htdocs\clothing_store`
+3. **ตั้งค่าฐานข้อมูล**:
+   - เปิด **XAMPP Control Panel** แล้วกด **Start** ที่โมดูล **Apache** และ **MySQL**
+   - เข้าเว็บบราวเซอร์ไปที่ `http://localhost/phpmyadmin`
+   - สร้างฐานข้อมูลชื่อ: `clothing_store` (Collation: `utf8mb4_general_ci`)
    - นำเข้า (Import) หรือรันคำสั่ง SQL DDL จากเอกสาร [`ER_DIAGRAM.md`](file:///D:/Xamp/htdocs/clothing_store/ER_DIAGRAM.md)
-
-3. **ตั้งค่าการเชื่อมต่อฐานข้อมูล**:
-   - ตรวจสอบไฟล์ [`config/db.php`](file:///D:/Xamp/htdocs/clothing_store/config/db.php) ให้ตรงกับการตั้งค่าของคุณ:
+4. **ตรวจสอบการเชื่อมต่อฐานข้อมูล**:
+   - ตรวจสอบไฟล์ [`config/db.php`](file:///D:/Xamp/htdocs/clothing_store/config/db.php) ให้ตรงกับการตั้งค่า MySQL:
      ```php
      $host = "localhost";
      $user = "root";
      $pass = "";
      $db   = "clothing_store";
      ```
-
-4. **ตรวจสอบสิทธิ์โฟลเดอร์สำหรับเก็บไฟล์**:
-   - ตรวจสอบว่ามีโฟลเดอร์ `uploads/` และ `uploads/slips/` อยู่ในโปรเจกต์เพื่อรองรับการอัปโหลดไฟล์รูปภาพ
-
-5. **เข้าใช้งานระบบผ่านเบราว์เซอร์**:
+5. **เข้าใช้งานหน้าเว็บ**:
    - หน้าร้านค้า (Customer): `http://localhost/clothing_store/index.php`
    - หน้าจัดการคำสั่งซื้อ (Admin): `http://localhost/clothing_store/admin/manage_orders.php`
    - หน้าจัดการสต็อกสินค้า (Admin): `http://localhost/clothing_store/admin/manage_stock.php`
 
 ---
 
+### 8.2 การรัน Mobile App บนสมาร์ตโฟนผ่าน Expo Go
 
+1. **เชื่อมต่อเครือข่าย Wi-Fi**:
+   - ให้สมาร์ตโฟนและเครื่องคอมพิวเตอร์เชื่อมต่อ **Wi-Fi เดียวกัน** (เพื่อให้โทรศัพท์สามารถยิงคำขอมายัง XAMPP บนคอมพิวเตอร์ผ่านวง LAN ได้)
+   - หมายเลข IP ของคอมพิวเตอร์เครื่องนี้คือ: **`192.168.1.141`** (กำหนดไว้ใน [`mobile/src/config.js`](file:///D:/Xamp/htdocs/clothing_store/mobile/src/config.js) เรียบร้อยแล้ว)
+2. **ติดตั้งแอป Expo Go บนมือถือ**:
+   - **Android**: ดาวน์โหลดจาก [Google Play Store](https://play.google.com/store/apps/details?id=host.exp.exponent) (ค้นหา "Expo Go")
+   - **iOS**: ดาวน์โหลดจาก [App Store](https://apps.apple.com/app/expo-go/id982107779) (ค้นหา "Expo Go")
+3. **รันเซิร์ฟเวอร์ Expo บนคอมพิวเตอร์**:
+   - เปิด PowerShell หรือ Terminal แล้วพิมพ์คำสั่ง:
+     ```powershell
+     cd D:\Xamp\htdocs\clothing_store\mobile
+     npx expo start
+     ```
+   - จะปรากฏ QR Code ขนาดใหญ่บนหน้าต่าง Terminal
+4. **เปิดแอปบนโทรศัพท์มือถือ**:
+   - **สำหรับ Android**: เปิดแอป Expo Go กดปุ่ม **"Scan QR code"** แล้วสแกน QR Code จากหน้าจอคอมพิวเตอร์
+   - **สำหรับ iPhone (iOS)**: เปิดแอป **กล้องถ่ายรูป (Camera)** ของ iPhone สแกน QR Code แล้วกดเปิดในแอป Expo Go
+   - ตัวแอปจะโหลดและเปิดหน้าร้านค้าขึ้นมาทันที!
+
+---
+
+## 🔑 บัญชีผู้ใช้งานสำหรับทดสอบระบบ (Test Accounts)
+
+| สิทธิ์การใช้งาน (Role) | ชื่อผู้ใช้ (Username) | รหัสผ่าน (Password) | ความสามารถในการทดสอบ |
+| :--- | :--- | :--- | :--- |
+| **👑 ผู้ดูแลระบบ (Admin)** | `admin` | `1234` | ตรวจสอบสลิปโอนเงิน, อนุมัติสถานะเป็น `Paid`, ปรับจำนวนสต็อกสินค้า (+/-), เพิ่มและลบสินค้า |
+| **👤 ลูกค้าทั่วไป (Customer)** | `test` | `1234` | เลือกสินค้าลงตะกร้า, สแกน PromptPay QR, เลือกภาพสลิปจากอัลบั้มมือถือ, และดูประวัติออเดอร์ |
+| **✨ สมัครสมาชิกใหม่** | *ตามที่ผู้ใช้กำหนด* | *ตามที่ผู้ใช้กำหนด* | สามารถกดปุ่มสมัครสมาชิกใหม่ได้ทั้งบนหน้าเว็บและในแอปมือถือ |
+
+---
+
+*จัดทำขึ้นเพื่อใช้ประกอบการศึกษาและการส่งโครงงานวิชา Term Project ปีการศึกษา 2026*
