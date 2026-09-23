@@ -5,7 +5,8 @@ if (session_status() === PHP_SESSION_NONE) {
 require_once __DIR__ . '/../config/db.php';
 
 // คำนวณ Base URL สำหรับให้ ลิงก์ เรียกใช้งานได้ถูกต้องทั้งหน้าปกติและในโฟลเดอร์ admin
-$script_dir = str_replace('\\', '/', dirname($_SERVER['SCRIPT_NAME']));
+$script_name = $_SERVER['SCRIPT_NAME'] ?? '';
+$script_dir = str_replace('\\', '/', dirname($script_name));
 $is_admin = (strpos($script_dir, '/admin') !== false);
 $path_prefix = $is_admin ? '../' : './';
 ?>
@@ -138,8 +139,14 @@ $path_prefix = $is_admin ? '../' : './';
 
         <!-- RIGHT MENU (CART & ACCOUNT) -->
         <div class="d-flex align-items-center gap-3">
-            <a href="<?php echo $path_prefix; ?>cart.php" class="text-dark fs-5 position-relative">
+            <?php $cart_count = get_cart_count(); ?>
+            <a href="<?php echo $path_prefix; ?>cart.php" class="text-dark fs-5 position-relative me-2" title="ตะกร้าสินค้า">
                 <i class="fa-solid fa-cart-shopping"></i>
+                <?php if ($cart_count > 0): ?>
+                    <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger" style="font-size: 0.65rem;">
+                        <?php echo $cart_count; ?>
+                    </span>
+                <?php endif; ?>
             </a>
 
             <div class="dropdown">

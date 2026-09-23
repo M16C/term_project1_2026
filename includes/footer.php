@@ -1,0 +1,70 @@
+</div><!-- ปิด container-fluid จาก header.php -->
+
+<footer class="bg-white border-top mt-auto py-5" style="border-color: var(--brand-secondary) !important;">
+    <div class="container">
+        <div class="row g-4 justify-content-between mb-4">
+            <!-- Brand & About -->
+            <div class="col-lg-4 col-md-6">
+                <h5 class="fw-bold tracking-wider mb-3 text-uppercase" style="letter-spacing: 2px;">CLOTHING STORE</h5>
+                <p class="text-muted small mb-3" style="line-height: 1.8;">
+                    เสื้อผ้าและเครื่องแต่งกายสไตล์มินิมอล ใส่สบาย เหมาะกับทุกโอกาส ออกแบบด้วยความใส่ใจในทุกรายละเอียด
+                </p>
+                <div class="d-flex gap-3 text-muted fs-5">
+                    <a href="#" class="text-secondary"><i class="fa-brands fa-facebook"></i></a>
+                    <a href="#" class="text-secondary"><i class="fa-brands fa-instagram"></i></a>
+                    <a href="#" class="text-secondary"><i class="fa-brands fa-line"></i></a>
+                    <a href="#" class="text-secondary"><i class="fa-brands fa-tiktok"></i></a>
+                </div>
+            </div>
+
+            <!-- Quick Links -->
+            <div class="col-lg-2 col-md-3 col-6">
+                <h6 class="fw-bold text-uppercase mb-3 small" style="letter-spacing: 1px;">หมวดหมู่สินค้า</h6>
+                <ul class="list-unstyled small mb-0">
+                    <li class="mb-2"><a href="<?php echo $path_prefix; ?>products.php?cat=men" class="text-decoration-none text-muted">Men's Collection</a></li>
+                    <li class="mb-2"><a href="<?php echo $path_prefix; ?>products.php?cat=women" class="text-decoration-none text-muted">Women's Collection</a></li>
+                    <li class="mb-2"><a href="<?php echo $path_prefix; ?>products.php?cat=clearance" class="text-decoration-none text-muted">Clearance Sale</a></li>
+                    <li class="mb-2"><a href="<?php echo $path_prefix; ?>products.php" class="text-decoration-none text-muted">All Products</a></li>
+                </ul>
+            </div>
+
+            <!-- Customer Service -->
+            <div class="col-lg-2 col-md-3 col-6">
+                <h6 class="fw-bold text-uppercase mb-3 small" style="letter-spacing: 1px;">บริการลูกค้า</h6>
+                <ul class="list-unstyled small mb-0">
+                    <li class="mb-2"><a href="<?php echo $path_prefix; ?>cart.php" class="text-decoration-none text-muted">ตะกร้าสินค้า</a></li>
+                    <li class="mb-2"><a href="<?php echo $path_prefix; ?>profile.php" class="text-decoration-none text-muted">บัญชีของฉัน</a></li>
+                    <li class="mb-2"><a href="#" class="text-decoration-none text-muted">การจัดส่งสินค้า</a></li>
+                    <li class="mb-2"><a href="#" class="text-decoration-none text-muted">นโยบายการเปลี่ยนคืน</a></li>
+                </ul>
+            </div>
+
+            <!-- Contact info -->
+            <div class="col-lg-3 col-md-6">
+                <h6 class="fw-bold text-uppercase mb-3 small" style="letter-spacing: 1px;">ติดต่อเรา</h6>
+                <ul class="list-unstyled small text-muted mb-0">
+                    <li class="mb-2"><i class="fa-solid fa-location-dot me-2 text-dark"></i> 123 Fashion Street, Bangkok, Thailand</li>
+                    <li class="mb-2"><i class="fa-solid fa-phone me-2 text-dark"></i> 02-123-4567</li>
+                    <li class="mb-2"><i class="fa-solid fa-envelope me-2 text-dark"></i> contact@clothingstore.com</li>
+                    <li class="mb-2"><i class="fa-solid fa-clock me-2 text-dark"></i> จันทร์ - ศุกร์: 09:00 - 18:00 น.</li>
+                </ul>
+            </div>
+        </div>
+
+        <hr style="border-color: var(--brand-secondary);">
+
+        <div class="row align-items-center py-2">
+            <div class="col-md-6 text-center text-md-start small text-muted">
+                &copy; <?php echo date('Y'); ?> Clothing Store. All rights reserved.
+            </div>
+            <div class="col-md-6 text-center text-md-end small text-muted mt-2 mt-md-0">
+                <span>Terms of Service</span> &bull; <span>Privacy Policy</span>
+            </div>
+        </div>
+    </div>
+</footer>
+
+<!-- Bootstrap 5 JavaScript Bundle -->
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>
