@@ -1,0 +1,264 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ER Diagram - Clothing Store</title>
+    <!-- Bootstrap 5 CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Google Font: Prompt -->
+    <link href="https://fonts.googleapis.com/css2?family=Prompt:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    
+    <style>
+        :root {
+            --brand-primary: #B5A3A1;
+            --brand-secondary: #DBCEC5;
+            --brand-dark: #2D2828;
+            --brand-light: #FAF8F5;
+        }
+        body {
+            font-family: 'Prompt', sans-serif;
+            background-color: var(--brand-light);
+            color: var(--brand-dark);
+            padding-bottom: 60px;
+        }
+        .header-bar {
+            background-color: #FFFFFF;
+            border-bottom: 1px solid var(--brand-secondary);
+            padding: 20px 0;
+            margin-bottom: 30px;
+        }
+        .diagram-container {
+            background: #FFFFFF;
+            border: 1px solid var(--brand-secondary);
+            border-radius: 8px;
+            padding: 30px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.03);
+            text-align: center;
+            overflow-x: auto;
+        }
+        .table-custom {
+            background: #FFFFFF;
+            border: 1px solid var(--brand-secondary);
+            border-radius: 8px;
+            overflow: hidden;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.03);
+            margin-bottom: 30px;
+        }
+        .table-custom .table-header {
+            background-color: var(--brand-dark);
+            color: #FFFFFF;
+            padding: 12px 20px;
+            font-weight: 600;
+        }
+        .badge-pk {
+            background-color: #e07a5f;
+            color: white;
+            font-weight: 600;
+        }
+        .badge-fk {
+            background-color: #3d405b;
+            color: white;
+            font-weight: 600;
+        }
+    </style>
+    <!-- Mermaid JS CDN -->
+    <script type="module">
+        import mermaid from 'https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.esm.min.mjs';
+        mermaid.initialize({ startOnLoad: true, theme: 'default' });
+    </script>
+</head>
+<body>
+
+<div class="header-bar shadow-sm">
+    <div class="container d-flex justify-content-between align-items-center">
+        <div>
+            <h4 class="fw-bold mb-0 text-uppercase"><i class="fa-solid fa-database me-2"></i>Database ER Diagram</h4>
+            <span class="text-muted small">Clothing Store Database Schema Documentation</span>
+        </div>
+        <a href="index.php" class="btn btn-outline-dark rounded-0 btn-sm"><i class="fa-solid fa-arrow-left me-1"></i>กลับสู่หน้าร้าน</a>
+    </div>
+</div>
+
+<div class="container">
+
+    <!-- แผนภาพ Mermaid ER Diagram -->
+    <div class="diagram-container mb-5">
+        <h5 class="fw-bold text-start mb-4"><i class="fa-solid fa-project-diagram me-2 text-primary"></i>แบบร่าง ER Diagram</h5>
+        <div class="mermaid">
+erDiagram
+    USERS ||--o{ ORDERS : "places (สั่งซื้อ)"
+    ORDERS ||--|{ ORDER_ITEMS : "contains (ประกอบด้วย)"
+    PRODUCTS ||--o{ ORDER_ITEMS : "included in (ถูกสั่งซื้อ)"
+
+    USERS {
+        int id PK "รหัสผู้ใช้ (Auto Increment)"
+        varchar username "ชื่อผู้ใช้สำหรับเข้าสู่ระบบ"
+        varchar password "รหัสผ่านที่เข้ารหัสแล้ว"
+        varchar fullname "ชื่อ-นามสกุล"
+        varchar email "อีเมล"
+        varchar phone "เบอร์โทรศัพท์"
+        varchar role "สิทธิ์การใช้งาน (user / admin)"
+    }
+
+    ORDERS {
+        int id PK "รหัสคำสั่งซื้อ (Auto Increment)"
+        int user_id FK "รหัสผู้สั่งซื้อ (อ้างอิง USERS.id)"
+        int total_amount "ยอดรวมคำสั่งซื้อ"
+        varchar payment_method "ช่องทางการชำระเงิน"
+        varchar status "สถานะคำสั่งซื้อ (เช่น Pending)"
+    }
+
+    ORDER_ITEMS {
+        int id PK "รหัสรายการสินค้าในออเดอร์"
+        int order_id FK "รหัสคำสั่งซื้อ (อ้างอิง ORDERS.id)"
+        int product_id FK "รหัสสินค้า (อ้างอิง PRODUCTS.id)"
+        int quantity "จำนวนชิ้นที่สั่งซื้อ"
+        int price "ราคาต่อหน่วย ณ เวลาสั่งซื้อ"
+    }
+
+    PRODUCTS {
+        int id PK "รหัสสินค้า (Auto Increment)"
+        varchar name "ชื่อสินค้า"
+        varchar gender "เพศ/กลุ่มเป้าหมาย (เช่น men, women)"
+        varchar category "หมวดหมู่สินค้า"
+        varchar subcategory "หมวดหมู่ย่อย"
+        int is_clearance "สถานะลดราคาล้างสต็อก (0/1)"
+        int price "ราคาสินค้า"
+        int stock "จำนวนสินค้าคงเหลือ"
+        varchar image "URL / path รูปภาพสินค้า"
+    }
+        </div>
+    </div>
+
+    <!-- Data Dictionary Tables -->
+    <h5 class="fw-bold mb-3"><i class="fa-solid fa-table me-2"></i>พจนานุกรมข้อมูล (Data Dictionary)</h5>
+
+    <!-- ตาราง users -->
+    <div class="table-custom">
+        <div class="table-header d-flex justify-content-between">
+            <span><i class="fa-solid fa-users me-2"></i>ตาราง users</span>
+            <small>เก็บข้อมูลผู้ใช้งานและผู้ดูแลระบบ</small>
+        </div>
+        <div class="table-responsive">
+            <table class="table table-hover align-middle mb-0">
+                <thead class="table-light">
+                    <tr>
+                        <th>คอลัมน์</th>
+                        <th>ประเภทข้อมูล</th>
+                        <th>Null</th>
+                        <th>คีย์</th>
+                        <th>ค่าเริ่มต้น</th>
+                        <th>คำอธิบาย</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr><td><code>id</code></td><td>INT(11)</td><td>NO</td><td><span class="badge badge-pk">PK</span></td><td>Auto Increment</td><td>รหัสผู้ใช้งาน</td></tr>
+                    <tr><td><code>username</code></td><td>VARCHAR(50)</td><td>NO</td><td>-</td><td>-</td><td>ชื่อผู้ใช้ล็อกอิน</td></tr>
+                    <tr><td><code>password</code></td><td>VARCHAR(255)</td><td>NO</td><td>-</td><td>-</td><td>รหัสผ่าน (Hash)</td></tr>
+                    <tr><td><code>fullname</code></td><td>VARCHAR(100)</td><td>NO</td><td>-</td><td>-</td><td>ชื่อ - นามสกุล</td></tr>
+                    <tr><td><code>email</code></td><td>VARCHAR(100)</td><td>NO</td><td>-</td><td>-</td><td>อีเมล</td></tr>
+                    <tr><td><code>phone</code></td><td>VARCHAR(20)</td><td>YES</td><td>-</td><td>NULL</td><td>เบอร์โทรศัพท์</td></tr>
+                    <tr><td><code>role</code></td><td>VARCHAR(20)</td><td>YES</td><td>-</td><td>'user'</td><td>สิทธิ์ ('user', 'admin')</td></tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- ตาราง products -->
+    <div class="table-custom">
+        <div class="table-header d-flex justify-content-between">
+            <span><i class="fa-solid fa-shirt me-2"></i>ตาราง products</span>
+            <small>เก็บข้อมูลสินค้าและสต็อก</small>
+        </div>
+        <div class="table-responsive">
+            <table class="table table-hover align-middle mb-0">
+                <thead class="table-light">
+                    <tr>
+                        <th>คอลัมน์</th>
+                        <th>ประเภทข้อมูล</th>
+                        <th>Null</th>
+                        <th>คีย์</th>
+                        <th>ค่าเริ่มต้น</th>
+                        <th>คำอธิบาย</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr><td><code>id</code></td><td>INT(11)</td><td>NO</td><td><span class="badge badge-pk">PK</span></td><td>Auto Increment</td><td>รหัสสินค้า</td></tr>
+                    <tr><td><code>name</code></td><td>VARCHAR(100)</td><td>NO</td><td>-</td><td>-</td><td>ชื่อสินค้า</td></tr>
+                    <tr><td><code>gender</code></td><td>VARCHAR(20)</td><td>NO</td><td>-</td><td>-</td><td>กลุ่มเป้าหมาย (men, women)</td></tr>
+                    <tr><td><code>category</code></td><td>VARCHAR(50)</td><td>NO</td><td>-</td><td>-</td><td>หมวดหมู่หลัก</td></tr>
+                    <tr><td><code>subcategory</code></td><td>VARCHAR(50)</td><td>YES</td><td>-</td><td>NULL</td><td>หมวดหมู่ย่อย</td></tr>
+                    <tr><td><code>is_clearance</code></td><td>INT(11)</td><td>YES</td><td>-</td><td>0</td><td>สินค้าลดราคา (0/1)</td></tr>
+                    <tr><td><code>price</code></td><td>INT(11)</td><td>NO</td><td>-</td><td>-</td><td>ราคา (บาท)</td></tr>
+                    <tr><td><code>stock</code></td><td>INT(11)</td><td>NO</td><td>-</td><td>-</td><td>จำนวนสต็อก</td></tr>
+                    <tr><td><code>image</code></td><td>VARCHAR(255)</td><td>YES</td><td>-</td><td>NULL</td><td>URL รูปภาพ</td></tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- ตาราง orders -->
+    <div class="table-custom">
+        <div class="table-header d-flex justify-content-between">
+            <span><i class="fa-solid fa-receipt me-2"></i>ตาราง orders</span>
+            <small>เก็บรายการคำสั่งซื้อหลัก</small>
+        </div>
+        <div class="table-responsive">
+            <table class="table table-hover align-middle mb-0">
+                <thead class="table-light">
+                    <tr>
+                        <th>คอลัมน์</th>
+                        <th>ประเภทข้อมูล</th>
+                        <th>Null</th>
+                        <th>คีย์</th>
+                        <th>ค่าเริ่มต้น</th>
+                        <th>คำอธิบาย</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr><td><code>id</code></td><td>INT(11)</td><td>NO</td><td><span class="badge badge-pk">PK</span></td><td>Auto Increment</td><td>รหัสคำสั่งซื้อ</td></tr>
+                    <tr><td><code>user_id</code></td><td>INT(11)</td><td>NO</td><td><span class="badge badge-fk">FK</span></td><td>-</td><td>รหัสผู้สั่ง (users.id)</td></tr>
+                    <tr><td><code>total_amount</code></td><td>INT(11)</td><td>NO</td><td>-</td><td>-</td><td>ยอดรวมคำสั่งซื้อ</td></tr>
+                    <tr><td><code>payment_method</code></td><td>VARCHAR(50)</td><td>YES</td><td>-</td><td>NULL</td><td>ช่องทางการชำระเงิน</td></tr>
+                    <tr><td><code>status</code></td><td>VARCHAR(50)</td><td>YES</td><td>-</td><td>'Pending'</td><td>สถานะออเดอร์</td></tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- ตาราง order_items -->
+    <div class="table-custom">
+        <div class="table-header d-flex justify-content-between">
+            <span><i class="fa-solid fa-boxes-packing me-2"></i>ตาราง order_items</span>
+            <small>เก็บรายการสินค้าในแต่ละคำสั่งซื้อ</small>
+        </div>
+        <div class="table-responsive">
+            <table class="table table-hover align-middle mb-0">
+                <thead class="table-light">
+                    <tr>
+                        <th>คอลัมน์</th>
+                        <th>ประเภทข้อมูล</th>
+                        <th>Null</th>
+                        <th>คีย์</th>
+                        <th>ค่าเริ่มต้น</th>
+                        <th>คำอธิบาย</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr><td><code>id</code></td><td>INT(11)</td><td>NO</td><td><span class="badge badge-pk">PK</span></td><td>Auto Increment</td><td>รหัสรายการสินค้า</td></tr>
+                    <tr><td><code>order_id</code></td><td>INT(11)</td><td>NO</td><td><span class="badge badge-fk">FK</span></td><td>-</td><td>รหัสออเดอร์ (orders.id)</td></tr>
+                    <tr><td><code>product_id</code></td><td>INT(11)</td><td>NO</td><td><span class="badge badge-fk">FK</span></td><td>-</td><td>รหัสสินค้า (products.id)</td></tr>
+                    <tr><td><code>quantity</code></td><td>INT(11)</td><td>NO</td><td>-</td><td>-</td><td>จำนวนชิ้น</td></tr>
+                    <tr><td><code>price</code></td><td>INT(11)</td><td>NO</td><td>-</td><td>-</td><td>ราคาต่อชิ้น ณ เวลาสั่งซื้อ</td></tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+</div>
+
+</body>
+</html>
