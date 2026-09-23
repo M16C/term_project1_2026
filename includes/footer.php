@@ -64,7 +64,82 @@
     </div>
 </footer>
 
+<!-- Toast Notification สำหรับ AJAX Cart -->
+<div class="toast-container position-fixed bottom-0 end-0 p-3" style="z-index: 9999;">
+    <div id="cartToast" class="toast align-items-center text-bg-dark border-0 rounded-0" role="alert" aria-live="assertive" aria-atomic="true">
+        <div class="d-flex">
+            <div class="toast-body d-flex align-items-center gap-2">
+                <i id="toastIcon" class="fa-solid fa-circle-check text-success fs-5"></i>
+                <span id="toastMessage">เพิ่มสินค้าลงในตะกร้าเรียบร้อยแล้ว</span>
+            </div>
+            <a href="<?php echo $path_prefix; ?>cart.php" class="btn btn-sm btn-outline-light align-self-center me-2 rounded-0">ดูตะกร้า</a>
+            <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast"></button>
+        </div>
+    </div>
+</div>
+
 <!-- Bootstrap 5 JavaScript Bundle -->
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+
+<!-- Global Script สำหรับ AJAX Add to Cart -->
+<script>
+function showCartToast(message, isSuccess = true) {
+    const toastEl = document.getElementById('cartToast');
+    if (!toastEl) return;
+    const msgEl = document.getElementById('toastMessage');
+    const iconEl = document.getElementById('toastIcon');
+    if (msgEl) msgEl.textContent = message;
+    if (iconEl) {
+        if (isSuccess) {
+            iconEl.className = 'fa-solid fa-circle-check text-success fs-5';
+        } else {
+            iconEl.className = 'fa-solid fa-circle-exclamation text-danger fs-5';
+        }
+    }
+    const toast = new bootstrap.Toast(toastEl, { delay: 3500 });
+    toast.show();
+}
+
+function updateCartBadge(count) {
+    const badge = document.getElementById('nav-cart-badge');
+    if (badge) {
+        badge.textContent = count;
+        if (count > 0) {
+            badge.classList.remove('d-none');
+        } else {
+            badge.classList.add('d-none');
+        }
+    }
+}
+
+document.addEventListener('click', function(e) {
+    const btn = e.target.closest('.ajax-add-to-cart, a[href*="cart.php?action=add"]');
+    if (btn) {
+        e.preventDefault();
+        const url = btn.getAttribute('href');
+        const originalContent = btn.innerHTML;
+        btn.style.pointerEvents = 'none';
+        btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> กำลังเพิ่ม...';
+
+        fetch(url, {
+            headers: { 'X-Requested-With': 'XMLHttpRequest' }
+        })
+        .then(response => response.json())
+        .then(data => {
+            btn.style.pointerEvents = '';
+            btn.innerHTML = originalContent;
+            showCartToast(data.message, data.success);
+            if (data.cart_count !== undefined) {
+                updateCartBadge(data.cart_count);
+            }
+        })
+        .catch(err => {
+            btn.style.pointerEvents = '';
+            btn.innerHTML = originalContent;
+            window.location.href = url;
+        });
+    }
+});
+</script>
 </body>
 </html>

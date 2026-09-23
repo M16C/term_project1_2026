@@ -131,22 +131,38 @@ $path_prefix = $is_admin ? '../' : './';
                             <li><a class="dropdown-item" href="<?php echo $is_admin ? 'manage_stock.php' : 'admin/manage_stock.php'; ?>#add-stock-form"><i class="fa-solid fa-plus me-2"></i>Add Stock</a></li>
                             <li><a class="dropdown-item" href="<?php echo $is_admin ? 'manage_stock.php' : 'admin/manage_stock.php'; ?>#stock-list"><i class="fa-solid fa-pen-to-square me-2"></i>Update Stock</a></li>
                             <li><a class="dropdown-item text-danger" href="<?php echo $is_admin ? 'manage_stock.php' : 'admin/manage_stock.php'; ?>#stock-list"><i class="fa-solid fa-trash me-2"></i>Delete Stock</a></li>
+                            <li><hr class="dropdown-divider"></li>
+                            <li><a class="dropdown-item fw-bold text-primary" href="<?php echo $is_admin ? 'manage_orders.php' : 'admin/manage_orders.php'; ?>"><i class="fa-solid fa-receipt me-2"></i>Manage Orders</a></li>
                         </ul>
                     </li>
                 <?php endif; ?>
+
+                <!-- Mobile Search Form -->
+                <li class="nav-item d-lg-none my-2 w-100">
+                    <form action="<?php echo $path_prefix; ?>products.php" method="GET" class="d-flex">
+                        <input type="text" name="q" class="form-control form-control-sm rounded-0" placeholder="ค้นหาเสื้อผ้า..." value="<?php echo htmlspecialchars($_GET['q'] ?? ''); ?>">
+                        <button class="btn btn-sm btn-dark rounded-0 ms-1" type="submit"><i class="fa-solid fa-magnifying-glass"></i></button>
+                    </form>
+                </li>
             </ul>
         </div>
 
-        <!-- RIGHT MENU (CART & ACCOUNT) -->
-        <div class="d-flex align-items-center gap-3">
+        <!-- RIGHT MENU (SEARCH, CART & ACCOUNT) -->
+        <div class="d-flex align-items-center gap-2">
+            <!-- Desktop Search Form -->
+            <form action="<?php echo $path_prefix; ?>products.php" method="GET" class="d-none d-lg-flex align-items-center me-2">
+                <div class="input-group input-group-sm">
+                    <input type="text" name="q" class="form-control rounded-0" placeholder="ค้นหาเสื้อผ้า..." value="<?php echo htmlspecialchars($_GET['q'] ?? ''); ?>" style="width: 150px; font-size: 0.8rem;">
+                    <button class="btn btn-outline-dark rounded-0 px-2" type="submit"><i class="fa-solid fa-magnifying-glass"></i></button>
+                </div>
+            </form>
+
             <?php $cart_count = get_cart_count(); ?>
-            <a href="<?php echo $path_prefix; ?>cart.php" class="text-dark fs-5 position-relative me-2" title="ตะกร้าสินค้า">
+            <a href="<?php echo $path_prefix; ?>cart.php" id="nav-cart-link" class="text-dark fs-5 position-relative me-2" title="ตะกร้าสินค้า">
                 <i class="fa-solid fa-cart-shopping"></i>
-                <?php if ($cart_count > 0): ?>
-                    <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger" style="font-size: 0.65rem;">
-                        <?php echo $cart_count; ?>
-                    </span>
-                <?php endif; ?>
+                <span id="nav-cart-badge" class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger <?php echo $cart_count > 0 ? '' : 'd-none'; ?>" style="font-size: 0.65rem;">
+                    <?php echo $cart_count; ?>
+                </span>
             </a>
 
             <div class="dropdown">

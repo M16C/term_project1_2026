@@ -87,9 +87,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
             $gender = $subcategory;
         }
 
+        $description = trim($_POST['description'] ?? '');
+
         if (!empty($name)) {
-            $stmt = mysqli_prepare($conn, "INSERT INTO products (name, category, subcategory, gender, is_clearance, price, stock, image) VALUES (?, ?, ?, ?, ?, ?, ?, ?)");
-            mysqli_stmt_bind_param($stmt, "ssssidis", $name, $category, $subcategory, $gender, $is_clearance, $price, $stock, $image);
+            $stmt = mysqli_prepare($conn, "INSERT INTO products (name, category, subcategory, description, gender, is_clearance, price, stock, image) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)");
+            mysqli_stmt_bind_param($stmt, "sssssidis", $name, $category, $subcategory, $description, $gender, $is_clearance, $price, $stock, $image);
             if (mysqli_stmt_execute($stmt)) {
                 set_flash('success', "เพิ่มสินค้า \"$name\" เข้าสต็อกเรียบร้อยแล้ว");
             } else {
@@ -137,9 +139,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
             $gender = $subcategory;
         }
 
+        $description = trim($_POST['description'] ?? '');
+
         if ($id > 0 && !empty($name)) {
-            $stmt = mysqli_prepare($conn, "UPDATE products SET name = ?, category = ?, subcategory = ?, gender = ?, is_clearance = ?, price = ?, stock = ?, image = ? WHERE id = ?");
-            mysqli_stmt_bind_param($stmt, "ssssidisi", $name, $category, $subcategory, $gender, $is_clearance, $price, $stock, $image, $id);
+            $stmt = mysqli_prepare($conn, "UPDATE products SET name = ?, category = ?, subcategory = ?, description = ?, gender = ?, is_clearance = ?, price = ?, stock = ?, image = ? WHERE id = ?");
+            mysqli_stmt_bind_param($stmt, "sssssidisi", $name, $category, $subcategory, $description, $gender, $is_clearance, $price, $stock, $image, $id);
             if (mysqli_stmt_execute($stmt)) {
                 set_flash('success', "อัปเดตข้อมูลสินค้า (ID: #$id) เรียบร้อยแล้ว");
             } else {
@@ -261,6 +265,11 @@ include '../includes/header.php';
                 <div class="form-text small">กรณีต้องการวางลิงก์รูปภาพภายนอก</div>
             </div>
 
+            <div class="col-12">
+                <label class="form-label small fw-semibold">รายละเอียดสินค้า (Description)</label>
+                <textarea name="description" class="form-control rounded-0" rows="2" placeholder="ระบุรายละเอียดสินค้า เนื้อผ้า สไตล์ การดูแลรักษา..."></textarea>
+            </div>
+
             <div class="col-md-2 d-flex align-items-end">
                 <button type="submit" class="btn btn-brand-dark w-100 py-2"><i class="fa-solid fa-floppy-disk me-1"></i> SAVE</button>
             </div>
@@ -338,6 +347,7 @@ include '../includes/header.php';
                                         data-subcategory="<?php echo htmlspecialchars($subcat, ENT_QUOTES, 'UTF-8'); ?>"
                                         data-price="<?php echo $price; ?>"
                                         data-stock="<?php echo $stock; ?>"
+                                        data-description="<?php echo htmlspecialchars($row['description'] ?? '', ENT_QUOTES, 'UTF-8'); ?>"
                                         data-image="<?php echo htmlspecialchars($img, ENT_QUOTES, 'UTF-8'); ?>"
                                         data-image-src="<?php echo htmlspecialchars($img_src, ENT_QUOTES, 'UTF-8'); ?>">
                                     <i class="fa-solid fa-pen-to-square me-1"></i>Update
@@ -404,6 +414,11 @@ include '../includes/header.php';
                         <div class="col-md-6">
                             <label class="form-label small fw-semibold">จำนวนในสต็อก *</label>
                             <input type="number" name="stock" id="edit_stock" class="form-control rounded-0" required>
+                        </div>
+
+                        <div class="col-12">
+                            <label class="form-label small fw-semibold">รายละเอียดสินค้า (Description)</label>
+                            <textarea name="description" id="edit_description" class="form-control rounded-0" rows="2" placeholder="ระบุรายละเอียดสินค้า..."></textarea>
                         </div>
 
                         <!-- แก้ไขรูปภาพ -->
@@ -548,6 +563,7 @@ document.addEventListener('DOMContentLoaded', function () {
 
             document.getElementById('edit_price').value = button.getAttribute('data-price') || '0';
             document.getElementById('edit_stock').value = button.getAttribute('data-stock') || '0';
+            document.getElementById('edit_description').value = button.getAttribute('data-description') || '';
             
             document.getElementById('edit_old_image').value = imgVal;
             document.getElementById('edit_image').value = (imgVal.startsWith('http://') || imgVal.startsWith('https://')) ? imgVal : '';

@@ -13,6 +13,9 @@ $action = $_GET['action'] ?? ($_POST['action'] ?? '');
 if ($action === 'add') {
     $product_id = intval($_GET['id'] ?? ($_POST['id'] ?? 0));
     $qty = max(1, intval($_POST['quantity'] ?? 1));
+    $is_ajax = (!empty($_SERVER['HTTP_X_REQUESTED_WITH']) && strtolower($_SERVER['HTTP_X_REQUESTED_WITH']) === 'xmlhttprequest') || isset($_GET['ajax']) || isset($_POST['ajax']);
+    $success = false;
+    $msg = "ไม่พบสินค้านี้ในระบบ";
 
     if ($product_id > 0) {
         $stmt = mysqli_prepare($conn, "SELECT id, name, price, stock, image FROM products WHERE id = ?");
@@ -22,7 +25,8 @@ if ($action === 'add') {
 
         if ($product) {
             if ($product['stock'] <= 0) {
-                set_flash('error', 'ขออภัย สินค้า "' . $product['name'] . '" สินค้าหมดชั่วคราว');
+                $msg = 'ขออภัย สินค้า "' . $product['name'] . '" สินค้าหมดชั่วคราว';
+                set_flash('error', $msg);
             } else {
                 $current_qty = $_SESSION['cart'][$product_id]['quantity'] ?? 0;
                 $new_qty = min($product['stock'], $current_qty + $qty);
@@ -36,10 +40,23 @@ if ($action === 'add') {
                     'quantity' => $new_qty
                 ];
 
-                set_flash('success', 'เพิ่ม "' . $product['name'] . '" ลงในตะกร้าเรียบร้อยแล้ว');
+                $success = true;
+                $msg = 'เพิ่ม "' . $product['name'] . '" ลงในตะกร้าเรียบร้อยแล้ว';
+                set_flash('success', $msg);
             }
         }
     }
+
+    if ($is_ajax) {
+        header('Content-Type: application/json; charset=utf-8');
+        echo json_encode([
+            'success' => $success,
+            'message' => $msg,
+            'cart_count' => get_cart_count()
+        ]);
+        exit();
+    }
+
     header("Location: cart.php");
     exit();
 }
@@ -108,7 +125,58 @@ if ($action === 'checkout' && $_SERVER['REQUEST_METHOD'] === 'POST') {
     }
 
     $user_id = $_SESSION['user_id'];
-    $payment_method = trim($_POST['payment_method'] ?? 'โอนเงินผ่านธนาคาร');
+    $payment_method = 'PromptPay QR Code';
+
+    // ตรวจสอบและอัปโหลดไฟล์สลิปการโอนเงิน
+    if (!isset($_FILES['slip_image']) || !is_uploaded_file($_FILES['slip_image']['tmp_name'])) {
+        set_flash('error', 'กรุณาสแกน QR Code และแนบไฟล์สลิปการโอนเงินก่อนทำการสั่งซื้อ');
+        header("Location: cart.php");
+        exit();
+    }
+
+    $slip_file = $_FILES['slip_image'];
+    if ($slip_file['error'] !== UPLOAD_ERR_OK) {
+        set_flash('error', 'เกิดข้อผิดพลาดในการอัปโหลดไฟล์สลิป (Code: ' . $slip_file['error'] . ')');
+        header("Location: cart.php");
+        exit();
+    }
+
+    $file_ext = strtolower(pathinfo($slip_file['name'], PATHINFO_EXTENSION));
+    $allowed_exts = ['jpg', 'jpeg', 'png', 'webp'];
+    if (!in_array($file_ext, $allowed_exts)) {
+        set_flash('error', 'ไฟล์สลิปต้องเป็นไฟล์รูปภาพ (JPG, PNG, WEBP) เท่านั้น');
+        header("Location: cart.php");
+        exit();
+    }
+
+    $image_info = @getimagesize($slip_file['tmp_name']);
+    if ($image_info === false) {
+        set_flash('error', 'ไฟล์ที่แนบมาไม่ใช่รูปภาพที่ถูกต้อง');
+        header("Location: cart.php");
+        exit();
+    }
+
+    if ($slip_file['size'] > 5 * 1024 * 1024) {
+        set_flash('error', 'ขนาดไฟล์สลิปต้องไม่เกิน 5MB');
+        header("Location: cart.php");
+        exit();
+    }
+
+    $slips_dir = __DIR__ . DIRECTORY_SEPARATOR . 'uploads' . DIRECTORY_SEPARATOR . 'slips' . DIRECTORY_SEPARATOR;
+    if (!is_dir($slips_dir)) {
+        @mkdir($slips_dir, 0777, true);
+    }
+
+    $slip_filename = 'slip_' . date('Ymd_His') . '_' . bin2hex(random_bytes(3)) . '.' . $file_ext;
+    $target_slip = $slips_dir . $slip_filename;
+
+    if (!move_uploaded_file($slip_file['tmp_name'], $target_slip)) {
+        set_flash('error', 'ไม่สามารถบันทึกไฟล์สลิปลงเซิร์ฟเวอร์ได้ กรุณาลองใหม่อีกครั้ง');
+        header("Location: cart.php");
+        exit();
+    }
+
+    $slip_path = 'uploads/slips/' . $slip_filename;
     
     // คำนวณยอดรวมสุทธิ
     $total_amount = 0;
@@ -120,10 +188,10 @@ if ($action === 'checkout' && $_SERVER['REQUEST_METHOD'] === 'POST') {
     mysqli_begin_transaction($conn);
 
     try {
-        // 1. บันทึกลงตาราง orders
-        $stmt_order = mysqli_prepare($conn, "INSERT INTO orders (user_id, total_amount, payment_method, status) VALUES (?, ?, ?, 'Pending')");
+        // 1. บันทึกลงตาราง orders พร้อมสลิป และสถานะเริ่มต้นเป็น 'Pending'
+        $stmt_order = mysqli_prepare($conn, "INSERT INTO orders (user_id, total_amount, payment_method, slip_image, status) VALUES (?, ?, ?, ?, 'Pending')");
         $total_int = (int)$total_amount;
-        mysqli_stmt_bind_param($stmt_order, "iis", $user_id, $total_int, $payment_method);
+        mysqli_stmt_bind_param($stmt_order, "iiss", $user_id, $total_int, $payment_method, $slip_path);
         
         if (!mysqli_stmt_execute($stmt_order)) {
             throw new Exception("ไม่สามารถสร้างคำสั่งซื้อได้: " . mysqli_error($conn));
@@ -212,13 +280,18 @@ include 'includes/header.php';
                 <i class="fa-solid fa-circle-check display-3"></i>
             </div>
             <h3 class="fw-bold mb-2">สั่งซื้อสินค้าสำเร็จแล้ว!</h3>
-            <p class="text-muted mb-4">
+            <p class="text-muted mb-3">
                 รหัสคำสั่งซื้อของคุณคือ <strong>#ORD-<?php echo str_pad($success_order['id'], 5, '0', STR_PAD_LEFT); ?></strong><br>
                 ยอดรวมสุทธิ: <strong class="text-dark fs-5"><?php echo format_price($success_order['total_amount']); ?></strong> | ช่องทางชำระเงิน: <strong><?php echo htmlspecialchars($success_order['payment_method']); ?></strong>
             </p>
+            <div class="alert alert-info rounded-0 small py-2 d-inline-block mb-4">
+                <i class="fa-solid fa-clock me-1"></i> ระบบได้รับสลิปการโอนเงินเรียบร้อยแล้ว แอดมินจะทำการตรวจสอบยอดเงินและปรับสถานะเป็น <strong>PAID</strong> ให้เร็วที่สุดครับ
+            </div>
             <div class="d-flex justify-content-center gap-3">
-                <a href="profile.php" class="btn btn-outline-dark rounded-0 px-4">ดูประวัติคำสั่งซื้อ</a>
-                <a href="products.php" class="btn btn-brand-dark px-4">เลือกดูสินค้าต่อ</a>
+                <a href="order_detail.php?id=<?php echo $success_order['id']; ?>" class="btn btn-brand-dark rounded-0 px-4">
+                    <i class="fa-solid fa-file-invoice me-1"></i> ดูใบเสร็จคำสั่งซื้อ
+                </a>
+                <a href="products.php" class="btn btn-outline-dark rounded-0 px-4">เลือกดูสินค้าต่อ</a>
             </div>
         </div>
     <?php elseif (!empty($_SESSION['cart'])): ?>
@@ -303,22 +376,49 @@ include 'includes/header.php';
                         <span class="fw-bold fs-5" style="color: var(--brand-primary);"><?php echo format_price($subtotal); ?></span>
                     </div>
 
-                    <!-- ฟอร์ม Checkout สั่งซื้อ -->
-                    <form method="POST" action="cart.php?action=checkout">
+                    <!-- ฟอร์ม Checkout สั่งซื้อ (สแกน QR Code และแนบสลิปเท่านั้น) -->
+                    <form method="POST" action="cart.php?action=checkout" enctype="multipart/form-data">
                         <?php echo csrf_field(); ?>
-                        <div class="mb-3">
-                            <label class="form-label small fw-semibold text-uppercase">ช่องทางการชำระเงิน <span class="text-danger">*</span></label>
-                            <select name="payment_method" class="form-select rounded-0" required>
-                                <option value="โอนเงินผ่านธนาคาร">โอนเงินผ่านธนาคาร (Bank Transfer)</option>
-                                <option value="เก็บเงินปลายทาง">เก็บเงินปลายทาง (Cash on Delivery)</option>
-                                <option value="บัตรเครดิต/เดบิต">บัตรเครดิต / เดบิต</option>
-                            </select>
+
+                        <!-- QR Code PromptPay -->
+                        <div class="mb-4 text-center p-3 border bg-light" style="border-color: var(--brand-secondary) !important;">
+                            <div class="fw-bold text-uppercase small mb-2 text-dark">
+                                <i class="fa-solid fa-qrcode me-1 text-primary"></i> สแกนจ่ายผ่าน PromptPay QR Code
+                            </div>
+                            <p class="small text-muted mb-2">เปิดแอปธนาคารใดก็ได้ แล้วสแกน QR Code เพื่อชำระเงิน</p>
+                            
+                            <div class="d-inline-block bg-white p-2 border shadow-sm mb-2">
+                                <img src="assets/qrcode.jpg" alt="PromptPay QR Code" class="img-fluid" style="max-width: 220px; width: 100%; height: auto;">
+                            </div>
+
+                            <div class="fw-bold fs-5 mt-1" style="color: var(--brand-primary);">
+                                ยอดชำระ: <?php echo format_price($subtotal); ?>
+                            </div>
+                            <div class="small text-muted mt-1" style="font-size: 0.75rem;">
+                                บัญชี: Clothing Store Official
+                            </div>
+                        </div>
+
+                        <!-- แนบสลิปการโอนเงิน -->
+                        <div class="mb-4">
+                            <label class="form-label small fw-semibold text-uppercase d-flex justify-content-between">
+                                <span><i class="fa-solid fa-file-invoice-dollar me-1"></i> แนบสลิปการโอนเงิน <span class="text-danger">*</span></span>
+                            </label>
+                            <input type="file" name="slip_image" id="slipInput" class="form-control rounded-0" accept="image/jpeg,image/png,image/webp" required onchange="previewSlip(this)">
+                            <div class="form-text small">รองรับ JPG, PNG, WEBP (ไม่เกิน 5MB)</div>
+
+                            <div class="mt-2 text-center">
+                                <img id="slipPreview" class="d-none border p-1" style="max-height: 180px; max-width: 100%; object-fit: contain;" alt="ตัวอย่างสลิปที่แนบ">
+                            </div>
                         </div>
 
                         <?php if (isset($_SESSION['user_id'])): ?>
                             <button type="submit" class="btn btn-brand-dark w-100 py-3 fw-bold" style="letter-spacing: 1px;">
-                                <i class="fa-solid fa-lock me-1"></i> CONFIRM ORDER (สั่งซื้อ)
+                                <i class="fa-solid fa-cloud-arrow-up me-1"></i> ยืนยันการสั่งซื้อและแนบสลิป
                             </button>
+                            <div class="text-center mt-2 small text-muted">
+                                <i class="fa-solid fa-shield-halved me-1"></i> แอดมินจะทำการตรวจสอบสลิปและปรับสถานะเป็น Paid
+                            </div>
                         <?php else: ?>
                             <a href="login.php" class="btn btn-brand-dark w-100 py-3 fw-bold text-center d-block text-decoration-none" style="letter-spacing: 1px;">
                                 <i class="fa-solid fa-right-to-bracket me-1"></i> เข้าสู่ระบบเพื่อสั่งซื้อ
@@ -329,6 +429,24 @@ include 'includes/header.php';
                 </div>
             </div>
         </div>
+
+        <script>
+        function previewSlip(input) {
+            const preview = document.getElementById('slipPreview');
+            if (!preview) return;
+            if (input.files && input.files[0]) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    preview.src = e.target.result;
+                    preview.classList.remove('d-none');
+                };
+                reader.readAsDataURL(input.files[0]);
+            } else {
+                preview.src = '';
+                preview.classList.add('d-none');
+            }
+        }
+        </script>
     <?php else: ?>
         <!-- ตะกร้าว่างเปล่า -->
         <div class="bg-white p-5 border text-center my-4" style="border-color: var(--brand-secondary) !important;">

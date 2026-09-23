@@ -93,20 +93,35 @@ include 'includes/header.php';
                                     <th>ยอดรวม</th>
                                     <th>การชำระเงิน</th>
                                     <th>สถานะ</th>
+                                    <th class="text-end">รายละเอียด</th>
                                 </tr>
                             </thead>
                             <tbody>
                                 <?php while ($ord = mysqli_fetch_assoc($orders_res)): ?>
                                     <tr>
-                                        <td class="fw-bold">#ORD-<?php echo str_pad($ord['id'], 5, '0', STR_PAD_LEFT); ?></td>
+                                        <td>
+                                            <a href="order_detail.php?id=<?php echo $ord['id']; ?>" class="fw-bold text-dark text-decoration-none" title="คลิกดูใบเสร็จ">
+                                                #ORD-<?php echo str_pad($ord['id'], 5, '0', STR_PAD_LEFT); ?>
+                                            </a>
+                                        </td>
                                         <td class="fw-bold" style="color: var(--brand-primary);"><?php echo format_price($ord['total_amount']); ?></td>
                                         <td><span class="badge bg-light text-dark border"><?php echo htmlspecialchars($ord['payment_method'] ?: 'โอนเงิน'); ?></span></td>
                                         <td>
-                                            <?php if ($ord['status'] === 'Completed' || $ord['status'] === 'Paid'): ?>
-                                                <span class="badge bg-success">ชำระแล้ว</span>
-                                            <?php else: ?>
-                                                <span class="badge bg-warning text-dark">รอดำเนินการ</span>
-                                            <?php endif; ?>
+                                            <?php 
+                                                $st = strtolower($ord['status'] ?? 'pending');
+                                                $badge_class = 'bg-secondary';
+                                                if ($st === 'pending') $badge_class = 'bg-warning text-dark';
+                                                elseif ($st === 'paid') $badge_class = 'bg-primary';
+                                                elseif ($st === 'shipped') $badge_class = 'bg-info text-dark';
+                                                elseif ($st === 'completed') $badge_class = 'bg-success';
+                                                elseif ($st === 'cancelled') $badge_class = 'bg-danger';
+                                            ?>
+                                            <span class="badge <?php echo $badge_class; ?> rounded-0"><?php echo htmlspecialchars(strtoupper($ord['status'] ?? 'PENDING')); ?></span>
+                                        </td>
+                                        <td class="text-end">
+                                            <a href="order_detail.php?id=<?php echo $ord['id']; ?>" class="btn btn-outline-dark btn-sm rounded-0">
+                                                <i class="fa-solid fa-file-invoice me-1"></i> ใบเสร็จ
+                                            </a>
                                         </td>
                                     </tr>
                                 <?php endwhile; ?>
