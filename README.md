@@ -226,24 +226,24 @@ sequenceDiagram
 
 ```mermaid
 flowchart TD
-    Start([ผู้ใช้เข้าสู่ระบบ]) --> Input[/กรอก Username และ Password/]
-    Input --> FetchDB[(ดึงข้อมูลผู้ใช้จาก MySQL)]
+    Start(["ผู้ใช้เข้าสู่ระบบ"]) --> Input[/"กรอก Username และ Password"/]
+    Input --> FetchDB[("ดึงข้อมูลผู้ใช้จาก MySQL")]
     
-    FetchDB --> UserExist{พบ Username ในระบบ?}
-    UserExist -- ไม่พบ --> LoginFail[แจ้งเตือนชื่อผู้ใช้หรือรหัสผ่านไม่ถูกต้อง]
+    FetchDB --> UserExist{"พบ Username ในระบบหรือไม่?"}
+    UserExist -- "ไม่พบ" --> LoginFail["แจ้งเตือนชื่อผู้ใช้หรือรหัสผ่านไม่ถูกต้อง"]
     
-    UserExist -- พบ --> CheckPass{password_verify<br/>ถูกต้องหรือไม่?}
-    CheckPass -- ไม่ตรง --> LoginFail
+    UserExist -- "พบ" --> CheckPass{"password_verify ถูกต้องหรือไม่?"}
+    CheckPass -- "ไม่ตรง" --> LoginFail
     
-    CheckPass -- ถูกต้อง --> SetSession["บันทึก Session:<br/>$_SESSION['user_id'] = user.id<br/>$_SESSION['role'] = user.role"]
-    SetSession --> CheckRole{บทบาทผู้ใช้ (Role)}
+    CheckPass -- "ถูกต้อง" --> SetSession["บันทึก Session<br/>user_id และ role"]
+    SetSession --> CheckRole{"ตรวจสอบบทบาทผู้ใช้ (Role)"}
     
-    CheckRole -- 'admin' --> AdminPerm["เข้าถึงได้ทุกส่วนของระบบ<br/>(หน้าร้าน + โฟลเดอร์ admin/)"]
-    CheckRole -- 'user' --> UserPerm["เข้าถึงได้เฉพาะหน้าร้าน<br/>และข้อมูลส่วนตัวของตนเอง"]
+    CheckRole -- "admin" --> AdminPerm["เข้าถึงได้ทุกส่วนของระบบ<br/>(หน้าร้าน + โฟลเดอร์ admin/)"]
+    CheckRole -- "user" --> UserPerm["เข้าถึงได้เฉพาะหน้าร้าน<br/>และข้อมูลคำสั่งซื้อของตนเอง"]
     
-    UserPerm --> TryAdmin{พยายามเข้า admin/* ?}
-    TryAdmin -- ใช่ --> BlockAdmin[ปฏิเสธการเข้าถึง<br/>Redirect ไป index.php]
-    TryAdmin -- ไม่ใช่ --> NormalBrowse[ใช้งานระบบตามปกติ]
+    UserPerm --> TryAdmin{"พยายามเข้าถึงโฟลเดอร์ admin/ ?"}
+    TryAdmin -- "ใช่" --> BlockAdmin["ปฏิเสธการเข้าถึง<br/>Redirect ไปยัง index.php"]
+    TryAdmin -- "ไม่ใช่" --> NormalBrowse["ใช้งานระบบตามปกติ"]
 ```
 
 ---
